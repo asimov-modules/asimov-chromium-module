@@ -1,0 +1,22 @@
+# See: https://asimov-specs.github.io/module-manifest/
+---
+name: chromium
+label: Chromium
+title: ASIMOV Chromium Module
+summary: Chromium/Brave bookmark import.
+links:
+  - https://github.com/asimov-modules/asimov-chromium-module
+  - https://crates.io/crates/asimov-chromium-module
+
+provides:
+  programs:
+    - asimov-chromium-importer
+
+handles:
+  url_protocols:
+  url_prefixes:
+    - brave://bookmarks
+    - chrome://bookmarks
+  url_patterns:
+  file_extensions:
+  content_types:
