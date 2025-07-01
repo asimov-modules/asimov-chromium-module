@@ -42,6 +42,13 @@ asimov-chromium-reader < $HOME/Library/Application\ Support/Google/Chrome/Profil
 asimov-chromium-reader < $HOME/Library/Application\ Support/BraveSoftware/Brave-Browser/Default/Bookmarks
 ```
 
+#### Read bookmarks on Linux
+
+```bash
+asimov-chromium-reader < $HOME/.config/google-chrome/Profile\ 1/Bookmarks
+asimov-chromium-reader < $HOME/.config/BraveSoftware/Brave-Browser/Default/Bookmarks
+```
+
 ## 👨‍💻 Development
 
 ```bash

@@ -52,11 +52,21 @@ fn main() -> Result<SysexitsError, Box<dyn Error>> {
     if input_url.starts_with("-") {
         std::io::stdin().lock().read_to_string(&mut input_buffer)?;
     } else if input_url.starts_with("chrome://bookmarks") {
-        let bookmarks_path = chrome::find_bookmarks_path()?;
-        input_buffer = std::fs::read_to_string(bookmarks_path)?;
+        for profile_name in ["Default", "Profile 1", "Profile 2"] {
+            let bookmarks_path = chrome::find_bookmarks_path(Some(profile_name))?;
+            if bookmarks_path.is_file() {
+                input_buffer = std::fs::read_to_string(bookmarks_path)?;
+                break;
+            }
+        }
     } else if input_url.starts_with("brave://bookmarks") {
-        let bookmarks_path = brave::find_bookmarks_path()?;
-        input_buffer = std::fs::read_to_string(bookmarks_path)?;
+        for profile_name in ["Default", "Profile 1", "Profile 2"] {
+            let bookmarks_path = brave::find_bookmarks_path(Some(profile_name))?;
+            if bookmarks_path.is_file() {
+                input_buffer = std::fs::read_to_string(bookmarks_path)?;
+                break;
+            }
+        }
     } else {
         eprintln!(
             "{}: {}: {}",
