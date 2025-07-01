@@ -10,7 +10,8 @@ links:
 
 provides:
   programs:
-    - asimov-chromium-importer
+    #- asimov-chromium-importer
+    - asimov-chromium-reader
 
 handles:
   url_protocols:

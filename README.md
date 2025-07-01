@@ -21,8 +21,25 @@ cargo install asimov-chromium-module
 
 ## 👉 Examples
 
+<!--
+### Importing bookmarks from Chrome
+
 ```bash
-asimov-chromium-importer
+asimov-chromium-importer chrome://bookmarks
+```
+
+### Importing bookmarks from Brave
+
+```bash
+asimov-chromium-importer brave://bookmarks
+```
+-->
+
+### Reading bookmarks on macOS
+
+```bash
+asimov-chromium-reader < $HOME/Library/Application\ Support/Google/Chrome/Profile\ 1/Bookmarks
+asimov-chromium-reader < $HOME/Library/Application\ Support/BraveSoftware/Brave-Browser/Default/Bookmarks
 ```
 
 ## 👨‍💻 Development

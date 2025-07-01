@@ -1,22 +1,19 @@
 // This is free and unencumbered software released into the public domain.
 
 #[cfg(not(feature = "std"))]
-compile_error!("asimov-chromium-importer requires the 'std' feature");
+compile_error!("asimov-chromium-reader requires the 'std' feature");
 
 use asimov_module::SysexitsError::{self, *};
 use clap::Parser;
 use clientele::StandardOptions;
 use std::{error::Error, io::Read};
 
-/// asimov-chromium-importer
+/// asimov-chromium-reader
 #[derive(Debug, Parser)]
-#[command(arg_required_else_help = true)]
+#[command(arg_required_else_help = false)]
 struct Options {
     #[clap(flatten)]
     flags: StandardOptions,
-
-    /// The `chrome:` or `brave:` URL to fetch
-    url: String,
 }
 
 fn main() -> Result<SysexitsError, Box<dyn Error>> {
