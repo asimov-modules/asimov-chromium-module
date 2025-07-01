@@ -6,4 +6,7 @@
 #[cfg(feature = "std")]
 extern crate std;
 
+pub mod bookmarks;
+pub use bookmarks::*;
+
 pub mod jq;

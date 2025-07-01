@@ -35,7 +35,9 @@ asimov-chromium-importer brave://bookmarks
 ```
 -->
 
-### Reading bookmarks on macOS
+### Reading Bookmarks
+
+#### Read bookmarks on macOS
 
 ```bash
 asimov-chromium-reader < $HOME/Library/Application\ Support/Google/Chrome/Profile\ 1/Bookmarks

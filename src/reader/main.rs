@@ -42,12 +42,16 @@ fn main() -> Result<SysexitsError, Box<dyn Error>> {
     #[cfg(feature = "tracing")]
     asimov_module::init_tracing_subscriber(&options.flags).expect("failed to initialize logging");
 
-    let mut input = String::new();
-    std::io::stdin().lock().read_to_string(&mut input)?;
+    // Parse the input JSON:
+    let mut buffer = String::new();
+    std::io::stdin().lock().read_to_string(&mut buffer)?;
+    let input = serde_json::from_str(&buffer)?;
 
-    let output = asimov_chromium_module::jq::bookmarks().filter_json_str(&input)?;
+    // Transform JSON to JSON-LD:
+    let transform = asimov_chromium_module::BookmarksTransform::new()?;
+    let output = transform.execute(input)?;
 
-    // Serialize the response data:
+    // Serialize the output JSON-LD:
     if cfg!(feature = "pretty") {
         colored_json::write_colored_json(&output, &mut std::io::stdout())?;
         println!();
