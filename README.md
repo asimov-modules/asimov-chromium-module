@@ -5,7 +5,7 @@
 [![Package](https://img.shields.io/crates/v/asimov-chromium-module)](https://crates.io/crates/asimov-chromium-module)
 [![Documentation](https://docs.rs/asimov-chromium-module/badge.svg)](https://docs.rs/asimov-chromium-module)
 
-[ASIMOV] module for Chromium/Brave bookmark import.
+[ASIMOV] module for Chromium (and Brave, Google Chrome) bookmark import.
 
 ## 🛠️ Prerequisites
 
@@ -21,13 +21,15 @@ cargo install asimov-chromium-module
 
 ## 👉 Examples
 
-### Importing bookmarks from Chrome
+### Importing Bookmarks
+
+### Import bookmarks from Chrome
 
 ```bash
 asimov-chromium-importer chrome://bookmarks
 ```
 
-### Importing bookmarks from Brave
+### Import bookmarks from Brave
 
 ```bash
 asimov-chromium-importer brave://bookmarks
