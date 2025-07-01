@@ -21,7 +21,6 @@ cargo install asimov-chromium-module
 
 ## 👉 Examples
 
-<!--
 ### Importing bookmarks from Chrome
 
 ```bash
@@ -33,7 +32,6 @@ asimov-chromium-importer chrome://bookmarks
 ```bash
 asimov-chromium-importer brave://bookmarks
 ```
--->
 
 ### Reading Bookmarks
 

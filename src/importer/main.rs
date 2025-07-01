@@ -3,6 +3,7 @@
 #[cfg(not(feature = "std"))]
 compile_error!("asimov-chromium-importer requires the 'std' feature");
 
+use asimov_chromium_module::{brave, chrome};
 use asimov_module::SysexitsError::{self, *};
 use clap::Parser;
 use clientele::StandardOptions;
@@ -15,7 +16,7 @@ struct Options {
     #[clap(flatten)]
     flags: StandardOptions,
 
-    /// The `chrome:` or `brave:` URL to fetch
+    /// The `chrome://bookmarks` or `brave://bookmarks` URL to fetch
     url: String,
 }
 
@@ -46,9 +47,24 @@ fn main() -> Result<SysexitsError, Box<dyn Error>> {
     asimov_module::init_tracing_subscriber(&options.flags).expect("failed to initialize logging");
 
     // Parse the input JSON:
-    let mut buffer = String::new();
-    std::io::stdin().lock().read_to_string(&mut buffer)?;
-    let input = serde_json::from_str(&buffer)?;
+    let input_url = &options.url;
+    let mut input_buffer = String::new();
+    if input_url.starts_with("-") {
+        std::io::stdin().lock().read_to_string(&mut input_buffer)?;
+    } else if input_url.starts_with("chrome://bookmarks") {
+        let bookmarks_path = chrome::find_bookmarks_path()?;
+        input_buffer = std::fs::read_to_string(bookmarks_path)?;
+    } else if input_url.starts_with("brave://bookmarks") {
+        let bookmarks_path = brave::find_bookmarks_path()?;
+        input_buffer = std::fs::read_to_string(bookmarks_path)?;
+    } else {
+        eprintln!(
+            "{}: {}: {}",
+            "asimov-chromium-importer", "unsupported URL", input_url
+        );
+        return Ok(EX_DATAERR);
+    }
+    let input = serde_json::from_str(&input_buffer)?;
 
     // Transform JSON to JSON-LD:
     let transform = asimov_chromium_module::BookmarksTransform::new()?;

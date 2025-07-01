@@ -7,6 +7,8 @@
 extern crate std;
 
 pub mod bookmarks;
-pub use bookmarks::*;
-
+pub mod brave;
 pub mod jq;
+
+pub mod chrome;
+pub use bookmarks::*;
