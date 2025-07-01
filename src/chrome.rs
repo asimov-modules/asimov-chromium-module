@@ -26,6 +26,6 @@ pub fn find_profile_path(profile_name: Option<&str>) -> Result<PathBuf> {
 }
 
 #[cfg(not(unix))]
-pub fn find_profile_path() -> Result<PathBuf> {
+pub fn find_profile_path(_profile_name: Option<&str>) -> Result<PathBuf> {
     todo!() // TODO
 }
