@@ -1,71 +1,78 @@
 name: Test Windows Bookmarks
 
 on:
-  push:
+    push:
 
 jobs:
-  test-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.85.0
-      - run: cargo build --release --bin asimov-chromium-importer --bin asimov-chromium-reader
-      - run: |
-          $localAppData = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
-          $json = @'
-          {
-            "roots": {
-              "bookmark_bar": {
-                "children": [
+    test-windows:
+        runs-on: windows-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: dtolnay/rust-toolchain@master
+              with:
+                  toolchain: 1.85.0
+
+            - run: cargo build --release --bin asimov-chromium-importer --bin asimov-chromium-reader
+
+            - name: Seed fake bookmark files
+              shell: pwsh
+              run: |
+                  $localAppData = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
+                  
+                  $json = @'
                   {
-                    "date_added": "13250000000000000",
-                    "guid": "123e4567-e89b-12d3-a456-426614174000",
-                    "name": "Example",
-                    "type": "url",
-                    "url": "https://example.com"
+                    "roots": {
+                      "bookmark_bar": {
+                        "children": [
+                          {
+                            "date_added": "13250000000000000",
+                            "guid": "123e4567-e89b-12d3-a456-426614174000",
+                            "name": "Example",
+                            "type": "url",
+                            "url": "https://example.com"
+                          }
+                        ],
+                        "type": "folder"
+                      },
+                      "other": { "children": [], "type": "folder" },
+                      "synced": { "children": [], "type": "folder" }
+                    }
                   }
-                ],
-                "type": "folder"
-              },
-              "other": { "children": [], "type": "folder" },
-              "synced": { "children": [], "type": "folder" }
-            }
-          }
-          '@
-          $profiles = "Default", "Profile 1", "Profile 2"
-          foreach ($profile in $profiles) {
-            $chrome_path = Join-Path $localAppData "Google\Chrome\User Data\$profile\Bookmarks"
-            $brave_path = Join-Path $localAppData "BraveSoftware\Brave-Browser\User Data\$profile\Bookmarks"
-            Set-Content -Path $chrome_path -Value $json
-            Set-Content -Path $brave_path -Value $json
-          }
-      - run: |
-          $localAppData = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
-          $env:LOCALAPPDATA = $localAppData
-          cargo run --release --bin asimov-chromium-importer -- chrome://bookmarks
-          if ($LASTEXITCODE -ne 0) {
-            Write-Error "Chrome import failed"
-            exit 1
-          }
-          Write-Output "Chrome import OK"
-      - run: |
-          $localAppData = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
-          $env:LOCALAPPDATA = $localAppData
-          cargo run --release --bin asimov-chromium-importer -- brave://bookmarks
-          if ($LASTEXITCODE -ne 0) {
-            Write-Error "Brave import failed"
-            exit 1
-          }
-          Write-Output "Brave import OK"
-      - run: |
-          $localAppData = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
-          $env:LOCALAPPDATA = $localAppData
-          $profiles = "Default", "Profile 1", "Profile 2"
-          foreach ($profile in $profiles) {
-            $chrome_path = Join-Path $localAppData "Google\Chrome\User Data\$profile\Bookmarks"
-            $brave_path = Join-Path $localAppData "BraveSoftware\Brave-Browser\User Data\$profile\Bookmarks"
-            Get-Content $chrome_path | cargo run --release --bin asimov-chromium-reader
-            Get-Content $brave_path | cargo run --release --bin asimov-chromium-reader
-          }
+                  '@
+                  
+                  $profiles = "Default", "Profile 1", "Profile 2"
+                  foreach ($profile in $profiles) {
+                    $chrome_path = Join-Path $localAppData "Google\Chrome\User Data\$profile\Bookmarks"
+                    $brave_path  = Join-Path $localAppData "BraveSoftware\Brave-Browser\User Data\$profile\Bookmarks"
+                  
+                    foreach ($path in $chrome_path, $brave_path) {
+                      $dir = Split-Path $path
+                      New-Item -Path $dir -ItemType Directory -Force | Out-Null
+                      Set-Content -Path $path -Value $json -Force
+                    }
+                  }
+
+            - name: Import Chrome bookmarks
+              shell: pwsh
+              run: |
+                  $env:LOCALAPPDATA = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
+                  cargo run --release --bin asimov-chromium-importer -- chrome://bookmarks
+
+            - name: Import Brave bookmarks
+              shell: pwsh
+              run: |
+                  $env:LOCALAPPDATA = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
+                  cargo run --release --bin asimov-chromium-importer -- brave://bookmarks
+
+            - name: Read and verify bookmarks
+              shell: pwsh
+              run: |
+                  $localAppData = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
+                  $profiles = "Default", "Profile 1", "Profile 2"
+                  foreach ($profile in $profiles) {
+                    $chrome_path = Join-Path $localAppData "Google\Chrome\User Data\$profile\Bookmarks"
+                    $brave_path  = Join-Path $localAppData "BraveSoftware\Brave-Browser\User Data\$profile\Bookmarks"
+                    Get-Content $chrome_path | cargo run --release --bin asimov-chromium-reader
+                    Get-Content $brave_path | cargo run --release --bin asimov-chromium-reader
+                  }
