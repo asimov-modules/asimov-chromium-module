@@ -27,8 +27,7 @@ pub fn find_profile_path(profile_name: Option<&str>) -> Result<PathBuf> {
 
 #[cfg(not(unix))]
 pub fn find_profile_path(profile_name: Option<&str>) -> Result<PathBuf> {
-    let local_app_data = std::env::var("LOCALAPPDATA")?;
-    let mut path: PathBuf = local_app_data.into();
+    let mut path: PathBuf = std::env::var("LOCALAPPDATA").expect("LOCALAPPDATA must be set").into();
     path.push("Google/Chrome/User Data");
     path.push(profile_name.unwrap_or("Default"));
     Ok(path)
