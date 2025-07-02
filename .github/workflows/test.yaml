@@ -1,0 +1,66 @@
+name: Test Windows Bookmarks
+
+on:
+  push:
+
+jobs:
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.85.0
+      - run: cargo build --release --bin asimov-chromium-importer --bin asimov-chromium-reader
+      - run: |
+          $env:LOCALAPPDATA = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
+          $json = @'
+          {
+            "roots": {
+              "bookmark_bar": {
+                "children": [
+                  {
+                    "date_added": "13250000000000000",
+                    "guid": "123e4567-e89b-12d3-a456-426614174000",
+                    "name": "Example",
+                    "type": "url",
+                    "url": "https://example.com"
+                  }
+                ],
+                "type": "folder"
+              },
+              "other": { "children": [], "type": "folder" },
+              "synced": { "children": [], "type": "folder" }
+            }
+          }
+          '@
+          $profiles = "Default", "Profile 1", "Profile 2"
+          foreach ($profile in $profiles) {
+            $chrome_path = Join-Path $env:LOCALAPPDATA "Google\Chrome\User Data\$profile\Bookmarks"
+            $brave_path = Join-Path $env:LOCALAPPDATA "BraveSoftware\Brave-Browser\User Data\$profile\Bookmarks"
+            Set-Content -Path $chrome_path -Value $json
+            Set-Content -Path $brave_path -Value $json
+          }
+      - run: |
+          cargo run --release --bin asimov-chromium-importer -- chrome://bookmarks
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Chrome import failed"
+            exit 1
+          }
+          Write-Output "Chrome import OK"
+      - run: |
+          cargo run --release --bin asimov-chromium-importer -- brave://bookmarks
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Brave import failed"
+            exit 1
+          }
+          Write-Output "Brave import OK"
+      - run: |
+          $env:LOCALAPPDATA = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
+          $profiles = "Default", "Profile 1", "Profile 2"
+          foreach ($profile in $profiles) {
+            $chrome_path = Join-Path $env:LOCALAPPDATA "Google\Chrome\User Data\$profile\Bookmarks"
+            $brave_path = Join-Path $env:LOCALAPPDATA "BraveSoftware\Brave-Browser\User Data\$profile\Bookmarks"
+            Get-Content $chrome_path | cargo run --release --bin asimov-chromium-reader
+            Get-Content $brave_path | cargo run --release --bin asimov-chromium-reader
+          }
