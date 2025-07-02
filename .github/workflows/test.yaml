@@ -13,7 +13,7 @@ jobs:
           toolchain: 1.85.0
       - run: cargo build --release --bin asimov-chromium-importer --bin asimov-chromium-reader
       - run: |
-          $env:LOCALAPPDATA = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
+          $localAppData = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
           $json = @'
           {
             "roots": {
@@ -36,12 +36,14 @@ jobs:
           '@
           $profiles = "Default", "Profile 1", "Profile 2"
           foreach ($profile in $profiles) {
-            $chrome_path = Join-Path $env:LOCALAPPDATA "Google\Chrome\User Data\$profile\Bookmarks"
-            $brave_path = Join-Path $env:LOCALAPPDATA "BraveSoftware\Brave-Browser\User Data\$profile\Bookmarks"
+            $chrome_path = Join-Path $localAppData "Google\Chrome\User Data\$profile\Bookmarks"
+            $brave_path = Join-Path $localAppData "BraveSoftware\Brave-Browser\User Data\$profile\Bookmarks"
             Set-Content -Path $chrome_path -Value $json
             Set-Content -Path $brave_path -Value $json
           }
       - run: |
+          $localAppData = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
+          $env:LOCALAPPDATA = $localAppData
           cargo run --release --bin asimov-chromium-importer -- chrome://bookmarks
           if ($LASTEXITCODE -ne 0) {
             Write-Error "Chrome import failed"
@@ -49,6 +51,8 @@ jobs:
           }
           Write-Output "Chrome import OK"
       - run: |
+          $localAppData = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
+          $env:LOCALAPPDATA = $localAppData
           cargo run --release --bin asimov-chromium-importer -- brave://bookmarks
           if ($LASTEXITCODE -ne 0) {
             Write-Error "Brave import failed"
@@ -56,11 +60,12 @@ jobs:
           }
           Write-Output "Brave import OK"
       - run: |
-          $env:LOCALAPPDATA = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
+          $localAppData = [System.Environment]::GetEnvironmentVariable("LOCALAPPDATA")
+          $env:LOCALAPPDATA = $localAppData
           $profiles = "Default", "Profile 1", "Profile 2"
           foreach ($profile in $profiles) {
-            $chrome_path = Join-Path $env:LOCALAPPDATA "Google\Chrome\User Data\$profile\Bookmarks"
-            $brave_path = Join-Path $env:LOCALAPPDATA "BraveSoftware\Brave-Browser\User Data\$profile\Bookmarks"
+            $chrome_path = Join-Path $localAppData "Google\Chrome\User Data\$profile\Bookmarks"
+            $brave_path = Join-Path $localAppData "BraveSoftware\Brave-Browser\User Data\$profile\Bookmarks"
             Get-Content $chrome_path | cargo run --release --bin asimov-chromium-reader
             Get-Content $brave_path | cargo run --release --bin asimov-chromium-reader
           }
