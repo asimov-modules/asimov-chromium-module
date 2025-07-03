@@ -2,10 +2,17 @@
 
 [![License](https://img.shields.io/badge/license-Public%20Domain-blue.svg)](https://unlicense.org)
 [![Compatibility](https://img.shields.io/badge/rust-1.85%2B-blue)](https://blog.rust-lang.org/2025/02/20/Rust-1.85.0/)
-[![Package](https://img.shields.io/crates/v/asimov-chromium-module)](https://crates.io/crates/asimov-chromium-module)
+[![Package on Crates.io](https://img.shields.io/crates/v/asimov-chromium-module)](https://crates.io/crates/asimov-chromium-module)
 [![Documentation](https://docs.rs/asimov-chromium-module/badge.svg)](https://docs.rs/asimov-chromium-module)
 
 [ASIMOV] module for Chromium (and Brave, Google Chrome) bookmark import.
+
+## ✨ Features
+
+- Extracts bookmarks from Chromium-based browsers (currently Brave and Google Chrome).
+- Constructs a semantic knowledge graph based on the [KNOW] ontology.
+- Supports [RDF] linked data output in the form of [JSON-LD].
+- Distributed as a standalone static binary with zero runtime dependencies.
 
 ## 🛠️ Prerequisites
 
@@ -73,3 +80,6 @@ git clone https://github.com/asimov-modules/asimov-chromium-module.git
 [![Share on LinkedIn](https://img.shields.io/badge/share%20on-linkedin-3949AB?logo=linkedin)](https://www.linkedin.com/sharing/share-offsite/?url=https://github.com/asimov-modules/asimov-chromium-module)
 
 [ASIMOV]: https://asimov.sh
+[JSON-LD]: https://json-ld.org
+[KNOW]: https://github.com/know-ontology
+[RDF]: https://www.w3.org/TR/rdf12-primer/
