@@ -53,9 +53,9 @@ asimov-chromium-reader < $HOME/.config/BraveSoftware/Brave-Browser/Default/Bookm
 
 #### Read bookmarks on Windows
 
-```bash
-asimov-chromium-reader < "$env:LOCALAPPDATA\Google\Chrome\User Data\Profile 1\Bookmarks"
-asimov-chromium-reader < "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data\Default\Bookmarks"
+```powershell
+Get-Content "$env:LOCALAPPDATA\Google\Chrome\User Data\Profile 1\Bookmarks" | asimov-chromium-reader
+Get-Content "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data\Default\Bookmarks" | asimov-chromium-reader
 ```
 
 ## 👨‍💻 Development
