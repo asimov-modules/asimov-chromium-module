@@ -27,7 +27,9 @@ pub fn find_profile_path(profile_name: Option<&str>) -> Result<PathBuf> {
 
 #[cfg(not(unix))]
 pub fn find_profile_path(profile_name: Option<&str>) -> Result<PathBuf> {
-    let mut path: PathBuf = std::env::var("LOCALAPPDATA").expect("LOCALAPPDATA must be set").into();
+    let mut path: PathBuf = std::env::var("LOCALAPPDATA")
+        .expect("LOCALAPPDATA must be set")
+        .into();
     path.push("BraveSoftware/Brave-Browser/User Data");
     path.push(profile_name.unwrap_or("Default"));
     Ok(path)
