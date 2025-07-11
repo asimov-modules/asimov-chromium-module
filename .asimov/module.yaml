@@ -14,11 +14,10 @@ provides:
     - asimov-chromium-reader
 
 handles:
-  url_protocols:
   url_prefixes:
     - brave://bookmarks
     - chrome://bookmarks
     - chromium://bookmarks
-  url_patterns:
-  file_extensions:
-  content_types:
+    - edge://bookmarks
+    - opera://bookmarks
+    - vivaldi://bookmarks
