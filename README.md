@@ -39,13 +39,13 @@ cargo install asimov-chromium-module
 #### Importing bookmarks from Chrome
 
 ```bash
-asimov-chromium-importer chrome://bookmarks
+asimov-chromium-fetcher chrome://bookmarks
 ```
 
 #### Importing bookmarks from Brave
 
 ```bash
-asimov-chromium-importer brave://bookmarks
+asimov-chromium-fetcher brave://bookmarks
 ```
 
 ### Import of Bookmarks Files
@@ -77,14 +77,37 @@ This module requires no configuration.
 
 ## 📚 Reference
 
-### `asimov-chromium-importer`
+### `asimov-chromium-fetcher`
 
 ```
+asimov-chromium-fetcher
+
+Usage: asimov-chromium-fetcher [OPTIONS] <URL>
+
+Arguments:
+  <URL>  The `chrome://bookmarks` or `brave://bookmarks` URL to fetch
+
+Options:
+  -d, --debug       Enable debugging output
+      --license     Show license information
+  -v, --verbose...  Enable verbose output (may be repeated for more verbosity)
+  -V, --version     Print version information
+  -h, --help        Print help
 ```
 
 ### `asimov-chromium-reader`
 
 ```
+asimov-chromium-reader
+
+Usage: asimov-chromium-reader [OPTIONS]
+
+Options:
+  -d, --debug       Enable debugging output
+      --license     Show license information
+  -v, --verbose...  Enable verbose output (may be repeated for more verbosity)
+  -V, --version     Print version information
+  -h, --help        Print help
 ```
 
 ## 👨‍💻 Development

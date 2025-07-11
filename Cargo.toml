@@ -52,8 +52,8 @@ strip = true
 lto = "thin"
 
 [[bin]]
-name = "asimov-chromium-importer"
-path = "src/importer/main.rs"
+name = "asimov-chromium-fetcher"
+path = "src/fetcher/main.rs"
 required-features = ["cli"]
 
 [[bin]]

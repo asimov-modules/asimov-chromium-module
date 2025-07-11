@@ -10,7 +10,7 @@ links:
 
 provides:
   programs:
-    - asimov-chromium-importer
+    - asimov-chromium-fetcher
     - asimov-chromium-reader
 
 handles:

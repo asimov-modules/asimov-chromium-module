@@ -1,7 +1,7 @@
 // This is free and unencumbered software released into the public domain.
 
 #[cfg(not(feature = "std"))]
-compile_error!("asimov-chromium-importer requires the 'std' feature");
+compile_error!("asimov-chromium-fetcher requires the 'std' feature");
 
 use asimov_chromium_module::{brave, chrome};
 use asimov_module::SysexitsError::{self, *};
@@ -9,7 +9,7 @@ use clap::Parser;
 use clientele::StandardOptions;
 use std::{error::Error, io::Read};
 
-/// asimov-chromium-importer
+/// asimov-chromium-fetcher
 #[derive(Debug, Parser)]
 #[command(arg_required_else_help = true)]
 struct Options {
@@ -70,7 +70,7 @@ fn main() -> Result<SysexitsError, Box<dyn Error>> {
     } else {
         eprintln!(
             "{}: {}: {}",
-            "asimov-chromium-importer", "unsupported URL", input_url
+            "asimov-chromium-fetcher", "unsupported URL", input_url
         );
         return Ok(EX_DATAERR);
     }
