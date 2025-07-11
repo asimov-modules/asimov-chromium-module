@@ -16,9 +16,15 @@
 
 ## 🛠️ Prerequisites
 
-- [Rust](https://rust-lang.org) 1.85+ (2024 edition)
+- [Rust] 1.85+ (2024 edition) if building from source code
 
 ## ⬇️ Installation
+
+### Installation with the [ASIMOV CLI]
+
+```bash
+asimov module install chromium -v
+```
 
 ### Installation from Source Code
 
@@ -28,41 +34,57 @@ cargo install asimov-chromium-module
 
 ## 👉 Examples
 
-### Importing Bookmarks
+### Import of Browser Bookmarks
 
-### Import bookmarks from Chrome
+#### Importing bookmarks from Chrome
 
 ```bash
 asimov-chromium-importer chrome://bookmarks
 ```
 
-### Import bookmarks from Brave
+#### Importing bookmarks from Brave
 
 ```bash
 asimov-chromium-importer brave://bookmarks
 ```
 
-### Reading Bookmarks
+### Import of Bookmarks Files
 
-#### Read bookmarks on macOS
+#### Parsing bookmarks files on macOS
 
 ```bash
 asimov-chromium-reader < $HOME/Library/Application\ Support/Google/Chrome/Profile\ 1/Bookmarks
 asimov-chromium-reader < $HOME/Library/Application\ Support/BraveSoftware/Brave-Browser/Default/Bookmarks
 ```
 
-#### Read bookmarks on Linux
+#### Parsing bookmarks files on Linux
 
 ```bash
 asimov-chromium-reader < $HOME/.config/google-chrome/Profile\ 1/Bookmarks
 asimov-chromium-reader < $HOME/.config/BraveSoftware/Brave-Browser/Default/Bookmarks
 ```
 
-#### Read bookmarks on Windows
+#### Parsing bookmarks files on Windows
 
 ```powershell
 Get-Content "$env:LOCALAPPDATA\Google\Chrome\User Data\Profile 1\Bookmarks" | asimov-chromium-reader
 Get-Content "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data\Default\Bookmarks" | asimov-chromium-reader
+```
+
+## ⚙ Configuration
+
+This module requires no configuration.
+
+## 📚 Reference
+
+### `asimov-chromium-importer`
+
+```
+```
+
+### `asimov-chromium-reader`
+
+```
 ```
 
 ## 👨‍💻 Development
@@ -80,6 +102,9 @@ git clone https://github.com/asimov-modules/asimov-chromium-module.git
 [![Share on LinkedIn](https://img.shields.io/badge/share%20on-linkedin-3949AB?logo=linkedin)](https://www.linkedin.com/sharing/share-offsite/?url=https://github.com/asimov-modules/asimov-chromium-module)
 
 [ASIMOV]: https://asimov.sh
+[ASIMOV CLI]: https://cli.asimov.sh
 [JSON-LD]: https://json-ld.org
-[KNOW]: https://github.com/know-ontology
+[KNOW]: https://know.dev
+[Maildir]: https://en.wikipedia.org/wiki/Maildir
 [RDF]: https://www.w3.org/TR/rdf12-primer/
+[Rust]: https://rust-lang.org
