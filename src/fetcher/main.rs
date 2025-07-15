@@ -3,7 +3,7 @@
 #[cfg(not(feature = "std"))]
 compile_error!("asimov-chromium-fetcher requires the 'std' feature");
 
-use asimov_chromium_module::{brave, chrome, edge};
+use asimov_chromium_module::{brave, chrome, chromium, edge};
 use asimov_module::SysexitsError::{self, *};
 use clap::Parser;
 use clientele::StandardOptions;
@@ -16,7 +16,7 @@ struct Options {
     #[clap(flatten)]
     flags: StandardOptions,
 
-    /// The `chrome://bookmarks`, `brave://bookmarks`, or `edge://bookmarks` URL to fetch
+    /// The `chrome://bookmarks`, `brave://bookmarks`, `edge://bookmarks`, or `chromium://bookmarks` URL to fetch
     url: String,
 }
 
@@ -70,6 +70,14 @@ fn main() -> Result<SysexitsError, Box<dyn Error>> {
     } else if input_url.starts_with("edge://bookmarks") {
         for profile_name in ["Default", "Profile 1", "Profile 2"] {
             let bookmarks_path = edge::find_bookmarks_path(Some(profile_name))?;
+            if bookmarks_path.is_file() {
+                input_buffer = std::fs::read_to_string(bookmarks_path)?;
+                break;
+            }
+        }
+    } else if input_url.starts_with("chromium://bookmarks") {
+        for profile_name in ["Default", "Profile 1", "Profile 2"] {
+            let bookmarks_path = chromium::find_bookmarks_path(Some(profile_name))?;
             if bookmarks_path.is_file() {
                 input_buffer = std::fs::read_to_string(bookmarks_path)?;
                 break;
