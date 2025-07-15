@@ -9,7 +9,7 @@
 
 ## ✨ Features
 
-- Extracts bookmarks from Chromium-based browsers (currently Brave and Google Chrome).
+- Extracts bookmarks from Chromium-based browsers (Chromium, Brave, Google Chrome, and Microsoft Edge).
 - Constructs a semantic knowledge graph based on the [KNOW] ontology.
 - Supports [RDF] linked data output in the form of [JSON-LD].
 - Distributed as a standalone static binary with zero runtime dependencies.
@@ -36,6 +36,12 @@ cargo install asimov-chromium-module
 
 ### Import of Browser Bookmarks
 
+#### Importing bookmarks from Chromium
+
+```bash
+asimov-chromium-fetcher chromium://bookmarks
+```
+
 #### Importing bookmarks from Chrome
 
 ```bash
@@ -48,27 +54,39 @@ asimov-chromium-fetcher chrome://bookmarks
 asimov-chromium-fetcher brave://bookmarks
 ```
 
+#### Importing bookmarks from Microsoft Edge
+
+```bash
+asimov-chromium-fetcher edge://bookmarks
+```
+
 ### Import of Bookmarks Files
 
 #### Parsing bookmarks files on macOS
 
 ```bash
+asimov-chromium-reader < $HOME/Library/Application\ Support/Chromium/Profile\ 1/Bookmarks
 asimov-chromium-reader < $HOME/Library/Application\ Support/Google/Chrome/Profile\ 1/Bookmarks
 asimov-chromium-reader < $HOME/Library/Application\ Support/BraveSoftware/Brave-Browser/Default/Bookmarks
+asimov-chromium-reader < $HOME/Library/Application\ Support/Microsoft\ Edge/Profile\ 1/Bookmarks
 ```
 
 #### Parsing bookmarks files on Linux
 
 ```bash
+asimov-chromium-reader < $HOME/.config/chromium/Profile\ 1/Bookmarks
 asimov-chromium-reader < $HOME/.config/google-chrome/Profile\ 1/Bookmarks
 asimov-chromium-reader < $HOME/.config/BraveSoftware/Brave-Browser/Default/Bookmarks
+asimov-chromium-reader < $HOME/.config/microsoft-edge/Profile\ 1/Bookmarks
 ```
 
 #### Parsing bookmarks files on Windows
 
 ```powershell
+Get-Content "$env:LOCALAPPDATA\Chromium\User Data\Profile 1\Bookmarks" | asimov-chromium-reader
 Get-Content "$env:LOCALAPPDATA\Google\Chrome\User Data\Profile 1\Bookmarks" | asimov-chromium-reader
 Get-Content "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data\Default\Bookmarks" | asimov-chromium-reader
+Get-Content "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Profile 1\Bookmarks" | asimov-chromium-reader
 ```
 
 ## ⚙ Configuration
@@ -85,7 +103,7 @@ asimov-chromium-fetcher
 Usage: asimov-chromium-fetcher [OPTIONS] <URL>
 
 Arguments:
-  <URL>  The `chrome://bookmarks` or `brave://bookmarks` URL to fetch
+  <URL>  The `chromium://bookmarks`, `chrome://bookmarks`, `brave://bookmarks`, or `edge://bookmarks` URL to fetch
 
 Options:
   -d, --debug       Enable debugging output
