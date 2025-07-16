@@ -1,4 +1,4 @@
-use miette::{IntoDiagnostic, Result, miette};
+use miette::{IntoDiagnostic, Result, WrapErr, miette};
 use phf::phf_map;
 use serde_json::Value;
 use std::format;
@@ -28,35 +28,44 @@ impl BrowserConfig {
     }
 
     pub fn profile_path(&self, profile_name: Option<&str>) -> Result<PathBuf> {
-        let mut path = PathBuf::new();
-
-        #[cfg(unix)]
-        {
-            let home = std::env::var("HOME")
-                .into_diagnostic()
-                .map_err(|_| miette!("HOME environment variable must be set"))?;
-            path.push(home);
-            #[cfg(target_os = "linux")]
-            path.push(self.paths.linux);
-            #[cfg(target_os = "macos")]
-            path.push(self.paths.macos);
-            #[cfg(not(any(target_os = "linux", target_os = "macos")))]
-            return Err(miette!("Unsupported Unix platform"));
-        }
-
-        #[cfg(not(unix))]
-        {
-            let local_app_data = std::env::var("LOCALAPPDATA")
-                .into_diagnostic()
-                .map_err(|_| miette!("LOCALAPPDATA environment variable must be set"))?;
-            path.push(local_app_data);
-            path.push(self.paths.windows);
-        }
-
+        let mut path = self.platform_user_data_path()?;
         path.push(profile_name.unwrap_or("Default"));
         if !path.is_dir() {
             return Err(miette!("Profile path not found: {}", path.display()));
         }
+        Ok(path)
+    }
+
+    fn platform_user_data_path(&self) -> Result<PathBuf> {
+        let mut path = PathBuf::new();
+
+        #[cfg(target_os = "linux")]
+        {
+            let home = std::env::var("HOME")
+                .into_diagnostic()
+                .wrap_err("HOME environment variable must be set")?;
+            path.push(home);
+            path.push(self.paths.linux);
+        }
+
+        #[cfg(target_os = "macos")]
+        {
+            let home = std::env::var("HOME")
+                .into_diagnostic()
+                .wrap_err("HOME environment variable must be set")?;
+            path.push(home);
+            path.push(self.paths.macos);
+        }
+
+        #[cfg(target_os = "windows")]
+        {
+            let local_app_data = std::env::var("LOCALAPPDATA")
+                .into_diagnostic()
+                .wrap_err("LOCALAPPDATA environment variable must be set")?;
+            path.push(local_app_data);
+            path.push(self.paths.windows);
+        }
+
         Ok(path)
     }
 
@@ -66,18 +75,17 @@ impl BrowserConfig {
     }
 
     pub fn list_profiles(&self) -> Result<Vec<String>> {
-        let base_path = self
-            .profile_path(None)?
+        let profile_path = self.profile_path(None)?;
+        let base_path = profile_path
             .parent()
-            .ok_or_else(|| miette!("Failed to get parent directory"))?
-            .to_path_buf();
+            .ok_or_else(|| miette!("Failed to get parent directory"))?;
 
         let mut profiles = Vec::new();
         for entry in std::fs::read_dir(base_path).into_diagnostic()? {
             let entry = entry.into_diagnostic()?;
             if entry.file_type().into_diagnostic()?.is_dir() {
                 if let Some(name) = entry.file_name().to_str() {
-                    if name == "Default" || name.starts_with("Profile ") {
+                    if matches!(name, "Default") || name.starts_with("Profile ") {
                         profiles.push(name.to_string());
                     }
                 }
@@ -87,7 +95,6 @@ impl BrowserConfig {
     }
 }
 
-// Static map of supported browsers and their user data paths.
 static SUPPORTED_BROWSERS: phf::Map<&'static str, UserDataPath> = phf_map! {
     "chrome" => UserDataPath {
         url_prefix: "chrome://bookmarks",
@@ -143,8 +150,16 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
     if let Some(profile) = profile_name {
         let path = browser.bookmarks_path(Some(profile))?;
         if path.is_file() {
-            let input = std::fs::read_to_string(&path).into_diagnostic()?;
-            outputs.push(serde_json::from_str(&input).into_diagnostic()?);
+            let input = std::fs::read_to_string(&path)
+                .into_diagnostic()
+                .wrap_err_with(|| format!("Failed to read bookmarks at {}", path.display()))?;
+            outputs.push(
+                serde_json::from_str(&input)
+                    .into_diagnostic()
+                    .wrap_err_with(|| {
+                        format!("Failed to parse bookmarks JSON from {}", path.display())
+                    })?,
+            );
         } else {
             return Err(miette!(
                 "Bookmarks file not found for profile: {} in browser: {}",
@@ -157,8 +172,18 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
         for profile in profiles {
             if let Ok(path) = browser.bookmarks_path(Some(&profile)) {
                 if path.is_file() {
-                    let input = std::fs::read_to_string(&path).into_diagnostic()?;
-                    outputs.push(serde_json::from_str(&input).into_diagnostic()?);
+                    let input = std::fs::read_to_string(&path)
+                        .into_diagnostic()
+                        .wrap_err_with(|| {
+                            format!("Failed to read bookmarks at {}", path.display())
+                        })?;
+                    outputs.push(
+                        serde_json::from_str(&input)
+                            .into_diagnostic()
+                            .wrap_err_with(|| {
+                                format!("Failed to parse bookmarks JSON from {}", path.display())
+                            })?,
+                    );
                 }
             }
         }
