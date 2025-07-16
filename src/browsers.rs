@@ -2,11 +2,11 @@
 
 use phf::phf_map;
 use serde_json::Value;
-use std::path::PathBuf;
-use std::{format, io};
 use std::boxed::Box;
+use std::path::PathBuf;
 use std::string::{String, ToString};
 use std::vec::Vec;
+use std::{format, io};
 
 /// Configuration for browser-specific user data paths.
 #[derive(Clone, Copy)]
@@ -36,41 +36,60 @@ impl BrowserConfig {
 
         #[cfg(unix)]
         {
-            let home = std::env::var("HOME")
-                .map_err(|_| io::Error::new(io::ErrorKind::NotFound, "HOME environment variable must be set"))?;
+            let home = std::env::var("HOME").map_err(|_| {
+                io::Error::new(
+                    io::ErrorKind::NotFound,
+                    "HOME environment variable must be set",
+                )
+            })?;
             path.push(home);
             #[cfg(target_os = "linux")]
             path.push(self.paths.linux);
             #[cfg(target_os = "macos")]
             path.push(self.paths.macos);
             #[cfg(not(any(target_os = "linux", target_os = "macos")))]
-            return Err(io::Error::new(io::ErrorKind::Unsupported, "Unsupported Unix platform"));
+            return Err(io::Error::new(
+                io::ErrorKind::Unsupported,
+                "Unsupported Unix platform",
+            ));
         }
 
         #[cfg(not(unix))]
         {
-            let local_app_data = std::env::var("LOCALAPPDATA")
-                .map_err(|_| io::Error::new(io::ErrorKind::NotFound, "LOCALAPPDATA environment variable must be set"))?;
+            let local_app_data = std::env::var("LOCALAPPDATA").map_err(|_| {
+                io::Error::new(
+                    io::ErrorKind::NotFound,
+                    "LOCALAPPDATA environment variable must be set",
+                )
+            })?;
             path.push(local_app_data);
             path.push(self.paths.windows);
         }
 
         path.push(profile_name.unwrap_or("Default"));
         if !path.is_dir() {
-            return Err(io::Error::new(io::ErrorKind::NotFound, format!("Profile path not found: {}", path.display())));
+            return Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                format!("Profile path not found: {}", path.display()),
+            ));
         }
         Ok(path)
     }
 
     /// Constructs the bookmarks file path for the given profile.
     pub fn bookmarks_path(&self, profile_name: Option<&str>) -> io::Result<PathBuf> {
-        self.profile_path(profile_name).map(|path| path.join("Bookmarks"))
+        self.profile_path(profile_name)
+            .map(|path| path.join("Bookmarks"))
     }
 
     /// Lists all profile directories under the browser's user data path.
     pub fn list_profiles(&self) -> io::Result<Vec<String>> {
-        let base_path = self.profile_path(None)?.parent()
-            .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "Failed to get parent directory"))?
+        let base_path = self
+            .profile_path(None)?
+            .parent()
+            .ok_or_else(|| {
+                io::Error::new(io::ErrorKind::NotFound, "Failed to get parent directory")
+            })?
             .to_path_buf();
         let mut profiles = Vec::new();
 
@@ -135,8 +154,11 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>, Box<dyn std::error::Erro
             format!(
                 "Unsupported URL: {}. Supported prefixes: {:?}",
                 url,
-                SUPPORTED_BROWSERS.into_iter().map(|(_, config)| config.url_prefix).collect::<Vec<_>>()
-            )
+                SUPPORTED_BROWSERS
+                    .into_iter()
+                    .map(|(_, config)| config.url_prefix)
+                    .collect::<Vec<_>>()
+            ),
         )
     })?;
 
@@ -155,7 +177,11 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>, Box<dyn std::error::Erro
         } else {
             return Err(Box::new(io::Error::new(
                 io::ErrorKind::NotFound,
-                format!("Bookmarks file not found for profile: {} in browser: {}", profile, browser.name()),
+                format!(
+                    "Bookmarks file not found for profile: {} in browser: {}",
+                    profile,
+                    browser.name()
+                ),
             )));
         }
     } else {
@@ -173,7 +199,10 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>, Box<dyn std::error::Erro
         if outputs.is_empty() {
             return Err(Box::new(io::Error::new(
                 io::ErrorKind::NotFound,
-                format!("No valid bookmarks files found for browser: {}", browser.name()),
+                format!(
+                    "No valid bookmarks files found for browser: {}",
+                    browser.name()
+                ),
             )));
         }
     }
