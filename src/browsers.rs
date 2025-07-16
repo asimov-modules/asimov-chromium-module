@@ -31,7 +31,11 @@ impl BrowserConfig {
         let mut path = self.platform_user_data_path()?;
         path.push(profile_name.unwrap_or("Default"));
         if !path.is_dir() {
-            return Err(miette!("Profile path not found: {}", path.display()));
+            return Err(miette!(
+                "Profile path not found for browser '{}': {}",
+                self.name,
+                path.display()
+            ));
         }
         Ok(path)
     }
@@ -64,6 +68,11 @@ impl BrowserConfig {
                 .wrap_err("LOCALAPPDATA environment variable must be set")?;
             path.push(local_app_data);
             path.push(self.paths.windows);
+        }
+
+        #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows")))]
+        {
+            return Err(miette!("Unsupported operating system"));
         }
 
         Ok(path)
@@ -124,7 +133,7 @@ static SUPPORTED_BROWSERS: phf::Map<&'static str, UserDataPath> = phf_map! {
 
 pub fn get_browser_from_url(url: &str) -> Option<BrowserConfig> {
     SUPPORTED_BROWSERS
-        .into_iter()
+        .entries()
         .find(|(_, config)| url.starts_with(config.url_prefix))
         .map(|(name, paths)| BrowserConfig { name, paths })
 }
@@ -149,41 +158,13 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
 
     if let Some(profile) = profile_name {
         let path = browser.bookmarks_path(Some(profile))?;
-        if path.is_file() {
-            let input = std::fs::read_to_string(&path)
-                .into_diagnostic()
-                .wrap_err_with(|| format!("Failed to read bookmarks at {}", path.display()))?;
-            outputs.push(
-                serde_json::from_str(&input)
-                    .into_diagnostic()
-                    .wrap_err_with(|| {
-                        format!("Failed to parse bookmarks JSON from {}", path.display())
-                    })?,
-            );
-        } else {
-            return Err(miette!(
-                "Bookmarks file not found for profile: {} in browser: {}",
-                profile,
-                browser.name()
-            ));
-        }
+        outputs.push(read_bookmarks_file(&path)?);
     } else {
         let profiles = browser.list_profiles()?;
         for profile in profiles {
             if let Ok(path) = browser.bookmarks_path(Some(&profile)) {
-                if path.is_file() {
-                    let input = std::fs::read_to_string(&path)
-                        .into_diagnostic()
-                        .wrap_err_with(|| {
-                            format!("Failed to read bookmarks at {}", path.display())
-                        })?;
-                    outputs.push(
-                        serde_json::from_str(&input)
-                            .into_diagnostic()
-                            .wrap_err_with(|| {
-                                format!("Failed to parse bookmarks JSON from {}", path.display())
-                            })?,
-                    );
+                if let Ok(bookmarks) = read_bookmarks_file(&path) {
+                    outputs.push(bookmarks);
                 }
             }
         }
@@ -197,4 +178,18 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
     }
 
     Ok(outputs)
+}
+
+fn read_bookmarks_file(path: &PathBuf) -> Result<Value> {
+    if !path.is_file() {
+        return Err(miette!("Bookmarks file not found at {}", path.display()));
+    }
+
+    let input = std::fs::read_to_string(path)
+        .into_diagnostic()
+        .wrap_err_with(|| format!("Failed to read bookmarks at {}", path.display()))?;
+
+    serde_json::from_str(&input)
+        .into_diagnostic()
+        .wrap_err_with(|| format!("Failed to parse bookmarks JSON from {}", path.display()))
 }
