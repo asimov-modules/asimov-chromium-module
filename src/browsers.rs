@@ -134,7 +134,7 @@ static SUPPORTED_BROWSERS: phf::Map<&'static str, UserDataPath> = phf_map! {
 pub fn get_browser_from_url(url: &str) -> Option<BrowserConfig> {
     SUPPORTED_BROWSERS
         .entries()
-        .find(|(_, config)| url.starts_with(config.url_prefix))
+        .find(|(_, config)| url == config.url_prefix || url.starts_with(&format!("{}/", config.url_prefix)))
         .map(|(name, paths)| BrowserConfig { name, paths })
 }
 
