@@ -1,10 +1,10 @@
 use miette::{IntoDiagnostic, Result, WrapErr, miette};
 use phf::phf_map;
 use serde_json::Value;
-use std::format;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::string::{String, ToString};
 use std::vec::Vec;
+use std::{format, vec};
 
 /// Configuration for browser-specific user data paths.
 #[derive(Clone, Copy)]
@@ -144,43 +144,43 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
             "Unsupported URL: {}. Supported prefixes: {:?}",
             url,
             SUPPORTED_BROWSERS
-                .into_iter()
+                .entries()
                 .map(|(_, config)| config.url_prefix)
                 .collect::<Vec<_>>()
         )
     })?;
 
-    let profile_name = url
+    let profiles: Vec<String> = url
         .strip_prefix(browser.paths.url_prefix)
-        .and_then(|suffix| suffix.strip_prefix('/').filter(|s| !s.is_empty()));
+        .and_then(|suffix| suffix.strip_prefix('/').filter(|s| !s.is_empty()))
+        .map(|profile| vec![profile.to_string()])
+        .unwrap_or_else(|| browser.list_profiles().unwrap_or_default());
+
+    if profiles.is_empty() {
+        return Err(miette!("No profiles found for browser: {}", browser.name()));
+    }
 
     let mut outputs = Vec::new();
 
-    if let Some(profile) = profile_name {
-        let path = browser.bookmarks_path(Some(profile))?;
-        outputs.push(read_bookmarks_file(&path)?);
-    } else {
-        let profiles = browser.list_profiles()?;
-        for profile in profiles {
-            if let Ok(path) = browser.bookmarks_path(Some(&profile)) {
-                if let Ok(bookmarks) = read_bookmarks_file(&path) {
-                    outputs.push(bookmarks);
-                }
+    for profile in profiles {
+        if let Ok(path) = browser.bookmarks_path(Some(&profile)) {
+            if let Ok(bookmarks) = read_bookmarks_file(&path) {
+                outputs.push(bookmarks);
             }
         }
+    }
 
-        if outputs.is_empty() {
-            return Err(miette!(
-                "No valid bookmarks files found for browser: {}",
-                browser.name()
-            ));
-        }
+    if outputs.is_empty() {
+        return Err(miette!(
+            "No valid bookmarks files found for browser: {}",
+            browser.name()
+        ));
     }
 
     Ok(outputs)
 }
 
-fn read_bookmarks_file(path: &PathBuf) -> Result<Value> {
+fn read_bookmarks_file(path: &Path) -> Result<Value> {
     if !path.is_file() {
         return Err(miette!("Bookmarks file not found at {}", path.display()));
     }
