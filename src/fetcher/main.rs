@@ -59,8 +59,8 @@ fn main() -> Result<SysexitsError, Box<dyn Error>> {
 
     // Transform JSON to JSON-LD:
     let transform = asimov_chromium_module::BookmarksTransform::new()?;
-    for input in &outputs {
-        let output = transform.execute(input.clone())?;
+    for input in outputs {
+        let output = transform.execute(input)?;
         // Serialize the output JSON-LD:
         if cfg!(feature = "pretty") {
             colored_json::write_colored_json(&output, &mut std::io::stdout())?;
