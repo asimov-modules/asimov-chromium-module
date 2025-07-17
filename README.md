@@ -40,24 +40,28 @@ cargo install asimov-chromium-module
 
 ```bash
 asimov-chromium-fetcher chromium://bookmarks
+asimov-chromium-fetcher chromium://bookmarks/Profile\ 1
 ```
 
 #### Importing bookmarks from Chrome
 
 ```bash
 asimov-chromium-fetcher chrome://bookmarks
+asimov-chromium-fetcher chrome://bookmarks/Default
 ```
 
 #### Importing bookmarks from Brave
 
 ```bash
 asimov-chromium-fetcher brave://bookmarks
+asimov-chromium-fetcher brave://bookmarks/Profile\ 2
 ```
 
 #### Importing bookmarks from Microsoft Edge
 
 ```bash
 asimov-chromium-fetcher edge://bookmarks
+asimov-chromium-fetcher edge://bookmarks/Profile\ 1
 ```
 
 ### Import of Bookmarks Files
