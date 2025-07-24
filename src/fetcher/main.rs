@@ -3,10 +3,11 @@
 #[cfg(not(feature = "std"))]
 compile_error!("asimov-chromium-fetcher requires the 'std' feature");
 
-use asimov_chromium_module::{brave, chrome, chromium, edge};
+use asimov_chromium_module::browsers;
 use asimov_module::SysexitsError::{self, *};
 use clap::Parser;
 use clientele::StandardOptions;
+use serde_json::Value;
 use std::{error::Error, io::Read};
 
 /// asimov-chromium-fetcher
@@ -16,7 +17,7 @@ struct Options {
     #[clap(flatten)]
     flags: StandardOptions,
 
-    /// The `chrome://bookmarks`, `brave://bookmarks`, `edge://bookmarks`, or `chromium://bookmarks` URL to fetch
+    /// The browser bookmarks URL to fetch (e.g., chrome://bookmarks, brave://bookmarks/Profile 5)
     url: String,
 }
 
@@ -48,60 +49,25 @@ fn main() -> Result<SysexitsError, Box<dyn Error>> {
 
     // Parse the input JSON:
     let input_url = &options.url;
-    let mut input_buffer = String::new();
-    if input_url.starts_with("-") {
+    let outputs: Vec<Value> = if input_url.starts_with("-") {
+        let mut input_buffer = String::new();
         std::io::stdin().lock().read_to_string(&mut input_buffer)?;
-    } else if input_url.starts_with("chrome://bookmarks") {
-        for profile_name in ["Default", "Profile 1", "Profile 2"] {
-            let bookmarks_path = chrome::find_bookmarks_path(Some(profile_name))?;
-            if bookmarks_path.is_file() {
-                input_buffer = std::fs::read_to_string(bookmarks_path)?;
-                break;
-            }
-        }
-    } else if input_url.starts_with("brave://bookmarks") {
-        for profile_name in ["Default", "Profile 1", "Profile 2"] {
-            let bookmarks_path = brave::find_bookmarks_path(Some(profile_name))?;
-            if bookmarks_path.is_file() {
-                input_buffer = std::fs::read_to_string(bookmarks_path)?;
-                break;
-            }
-        }
-    } else if input_url.starts_with("edge://bookmarks") {
-        for profile_name in ["Default", "Profile 1", "Profile 2"] {
-            let bookmarks_path = edge::find_bookmarks_path(Some(profile_name))?;
-            if bookmarks_path.is_file() {
-                input_buffer = std::fs::read_to_string(bookmarks_path)?;
-                break;
-            }
-        }
-    } else if input_url.starts_with("chromium://bookmarks") {
-        for profile_name in ["Default", "Profile 1", "Profile 2"] {
-            let bookmarks_path = chromium::find_bookmarks_path(Some(profile_name))?;
-            if bookmarks_path.is_file() {
-                input_buffer = std::fs::read_to_string(bookmarks_path)?;
-                break;
-            }
-        }
+        vec![serde_json::from_str(&input_buffer)?]
     } else {
-        eprintln!(
-            "{}: {}: {}",
-            "asimov-chromium-fetcher", "unsupported URL", input_url
-        );
-        return Ok(EX_DATAERR);
-    }
-    let input = serde_json::from_str(&input_buffer)?;
+        browsers::fetch_bookmarks(input_url)?
+    };
 
     // Transform JSON to JSON-LD:
     let transform = asimov_chromium_module::BookmarksTransform::new()?;
-    let output = transform.execute(input)?;
-
-    // Serialize the output JSON-LD:
-    if cfg!(feature = "pretty") {
-        colored_json::write_colored_json(&output, &mut std::io::stdout())?;
-        println!();
-    } else {
-        println!("{}", serde_json::to_string(&output).unwrap());
+    for input in outputs {
+        let output = transform.execute(input)?;
+        // Serialize the output JSON-LD:
+        if cfg!(feature = "pretty") {
+            colored_json::write_colored_json(&output, &mut std::io::stdout())?;
+            println!();
+        } else {
+            println!("{}", serde_json::to_string(&output).unwrap());
+        }
     }
 
     Ok(EX_OK)
