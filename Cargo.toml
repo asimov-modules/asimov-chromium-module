@@ -54,8 +54,8 @@ strip = true
 lto = "thin"
 
 [[bin]]
-name = "asimov-chromium-fetcher"
-path = "src/fetcher/main.rs"
+name = "asimov-chromium-cataloger"
+path = "src/cataloger/main.rs"
 required-features = ["cli"]
 
 [[bin]]

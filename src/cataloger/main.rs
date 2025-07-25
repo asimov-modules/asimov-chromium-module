@@ -1,7 +1,7 @@
 // This is free and unencumbered software released into the public domain.
 
 #[cfg(not(feature = "std"))]
-compile_error!("asimov-chromium-fetcher requires the 'std' feature");
+compile_error!("asimov-chromium-cataloger requires the 'std' feature");
 
 use asimov_chromium_module::browsers;
 use asimov_module::SysexitsError::{self, *};
@@ -14,14 +14,14 @@ use dogma::{
 };
 use std::error::Error;
 
-/// asimov-chromium-fetcher
+/// asimov-chromium-cataloger
 #[derive(Debug, Parser)]
 #[command(arg_required_else_help = true)]
 struct Options {
     #[clap(flatten)]
     flags: StandardOptions,
 
-    /// The browser bookmarks URL to fetch (e.g., `chrome://bookmarks`, `brave://bookmarks/2`)
+    /// The browser bookmarks URL to catalog (e.g., `chrome://bookmarks`, `brave://bookmarks/2`)
     #[arg(value_name = "URL", value_parser = UriValueParser::new(&[
         Chrome,
         Other("brave".into()),

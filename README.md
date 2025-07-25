@@ -39,29 +39,29 @@ cargo install asimov-chromium-module
 #### Importing bookmarks from Chromium
 
 ```bash
-asimov-chromium-fetcher chromium://bookmarks
-asimov-chromium-fetcher chromium://bookmarks/Profile\ 1
+asimov-chromium-cataloger chromium://bookmarks
+asimov-chromium-cataloger chromium://bookmarks/Profile\ 1
 ```
 
 #### Importing bookmarks from Chrome
 
 ```bash
-asimov-chromium-fetcher chrome://bookmarks
-asimov-chromium-fetcher chrome://bookmarks/Default
+asimov-chromium-cataloger chrome://bookmarks
+asimov-chromium-cataloger chrome://bookmarks/Default
 ```
 
 #### Importing bookmarks from Brave
 
 ```bash
-asimov-chromium-fetcher brave://bookmarks
-asimov-chromium-fetcher brave://bookmarks/Profile\ 2
+asimov-chromium-cataloger brave://bookmarks
+asimov-chromium-cataloger brave://bookmarks/Profile\ 2
 ```
 
 #### Importing bookmarks from Microsoft Edge
 
 ```bash
-asimov-chromium-fetcher edge://bookmarks
-asimov-chromium-fetcher edge://bookmarks/Profile\ 1
+asimov-chromium-cataloger edge://bookmarks
+asimov-chromium-cataloger edge://bookmarks/Profile\ 1
 ```
 
 ### Import of Bookmarks Files
@@ -101,18 +101,18 @@ This module requires no configuration.
 
 ### Installed Binaries
 
-- `asimov-chromium-fetcher`: fetches bookmarks from Chromium-based browsers
+- `asimov-chromium-cataloger`: lists bookmarks from Chromium-based browsers
 - `asimov-chromium-reader`: parses bookmarks from Chromium `Bookmarks` files
 
-### `asimov-chromium-fetcher`
+### `asimov-chromium-cataloger`
 
 ```
-asimov-chromium-fetcher
+asimov-chromium-cataloger
 
-Usage: asimov-chromium-fetcher [OPTIONS] <URL>
+Usage: asimov-chromium-cataloger [OPTIONS] <URL>
 
 Arguments:
-  <URL>  The `chromium://bookmarks`, `chrome://bookmarks`, `brave://bookmarks`, or `edge://bookmarks` URL to fetch
+  <URL>  The browser bookmarks URL to catalog (e.g., `chrome://bookmarks`, `brave://bookmarks/2`)
 
 Options:
   -d, --debug       Enable debugging output
