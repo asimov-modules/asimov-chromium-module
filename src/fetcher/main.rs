@@ -7,8 +7,12 @@ use asimov_chromium_module::browsers;
 use asimov_module::SysexitsError::{self, *};
 use clap::Parser;
 use clientele::StandardOptions;
-use serde_json::Value;
-use std::{error::Error, io::Read};
+use dogma::{
+    Uri,
+    UriScheme::{Chrome, Other},
+    UriValueParser,
+};
+use std::error::Error;
 
 /// asimov-chromium-fetcher
 #[derive(Debug, Parser)]
@@ -17,11 +21,19 @@ struct Options {
     #[clap(flatten)]
     flags: StandardOptions,
 
-    /// The browser bookmarks URL to fetch (e.g., chrome://bookmarks, brave://bookmarks/Profile 5)
-    url: String,
+    /// The browser bookmarks URL to fetch (e.g., `chrome://bookmarks`, `brave://bookmarks/2`)
+    #[arg(value_name = "URL", value_parser = UriValueParser::new(&[
+        Chrome,
+        Other("brave".into()),
+        Other("chromium".into()),
+        Other("edge".into()),
+        Other("opera".into()),
+        Other("vivaldi".into()),
+    ]))]
+    url: Uri<'static>,
 }
 
-fn main() -> Result<SysexitsError, Box<dyn Error>> {
+pub fn main() -> Result<SysexitsError, Box<dyn Error>> {
     // Load environment variables from `.env`:
     asimov_module::dotenv().ok();
 
@@ -49,13 +61,14 @@ fn main() -> Result<SysexitsError, Box<dyn Error>> {
 
     // Parse the input JSON:
     let input_url = &options.url;
-    let outputs: Vec<Value> = if input_url.starts_with("-") {
-        let mut input_buffer = String::new();
-        std::io::stdin().lock().read_to_string(&mut input_buffer)?;
-        vec![serde_json::from_str(&input_buffer)?]
-    } else {
-        browsers::fetch_bookmarks(input_url)?
-    };
+    // let outputs: Vec<Value> = if input_url.starts_with("-") {
+    //     let mut input_buffer = String::new();
+    //     std::io::stdin().lock().read_to_string(&mut input_buffer)?;
+    //     vec![serde_json::from_str(&input_buffer)?]
+    // } else {
+    //     browsers::fetch_bookmarks(input_url)?
+    // };
+    let outputs = browsers::fetch_bookmarks(input_url.to_string().as_ref())?;
 
     // Transform JSON to JSON-LD:
     let transform = asimov_chromium_module::BookmarksTransform::new()?;
