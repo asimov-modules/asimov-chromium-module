@@ -45,7 +45,17 @@ fn main() -> Result<SysexitsError, Box<dyn Error>> {
     // Parse the input JSON:
     let mut buffer = String::new();
     std::io::stdin().lock().read_to_string(&mut buffer)?;
-    let input = serde_json::from_str(&buffer)?;
+    let mut input: serde_json::Value = serde_json::from_str(&buffer)?;
+
+    // Convert Arc sidebar format to Chromium format
+    if let Some(sidebar) = input.get("sidebar") {
+        if let Some(_containers) = sidebar.get("containers") {
+            input = asimov_chromium_module::specialized::arc::convert_arc_bookmarks_to_chromium(
+                input,
+                Some("Default"),
+            )?;
+        }
+    }
 
     // Transform JSON to JSON-LD:
     let transform = asimov_chromium_module::BookmarksTransform::new()?;
