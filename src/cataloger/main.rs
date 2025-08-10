@@ -29,6 +29,7 @@ struct Options {
         Other("edge".into()),
         Other("opera".into()),
         Other("vivaldi".into()),
+        Other("arc".into()),
     ]))]
     url: Uri<'static>,
 }
