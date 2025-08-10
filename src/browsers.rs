@@ -232,7 +232,6 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
     if browser.browser_type() == Some(Browser::Arc) {
         let profile: Option<String> = if url.starts_with("arc://bookmarks/") {
             let profile_part = url.strip_prefix("arc://bookmarks/").unwrap_or("");
-            print!("OLHA profile_part: {}", profile_part);
             if profile_part.is_empty() {
                 None
             } else {
@@ -248,7 +247,6 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
                 .and_then(|suffix| suffix.strip_prefix('/').filter(|s| !s.is_empty()))
                 .map(|profile| profile.to_string())
         };
-        print!("OLHA profile novamente: {:?}", profile);
 
         let profile_to_use = if let Some(profile_name) = profile.as_deref() {
             if profile_name == "Default" {
