@@ -4,7 +4,7 @@ use serde_json::Value;
 use std::path::{Path, PathBuf};
 use std::string::{String, ToString};
 use std::vec::Vec;
-use std::{boxed::Box, format, vec};
+use std::{format, vec};
 
 use crate::specialized;
 
@@ -250,25 +250,23 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
 
         let profile_to_use = if let Some(profile_name) = profile.as_deref() {
             if profile_name == "Default" {
-                "Default"
+                "Default".to_string()
             } else if profile_name.starts_with("Profile") && !profile_name.contains(" ") {
                 let number = profile_name.strip_prefix("Profile").unwrap_or("");
                 if !number.is_empty() {
-                    let formatted_profile = format!("Profile {}", number);
-                    let profile_string = Box::leak(Box::new(formatted_profile));
-                    profile_string.as_str()
+                    format!("Profile {}", number)
                 } else {
-                    profile_name
+                    profile_name.to_string()
                 }
             } else {
-                profile_name
+                profile_name.to_string()
             }
         } else {
-            "Default"
+            "Default".to_string()
         };
 
-        if let Ok(path) = browser.bookmarks_path(Some(profile_to_use)) {
-            if let Ok(bookmarks) = read_bookmarks_file(&path, Some(profile_to_use)) {
+        if let Ok(path) = browser.bookmarks_path(Some(profile_to_use.as_str())) {
+            if let Ok(bookmarks) = read_bookmarks_file(&path, Some(profile_to_use.as_str())) {
                 return Ok(vec![bookmarks]);
             }
         }
@@ -293,7 +291,7 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
     let mut outputs = Vec::new();
 
     for profile in profiles {
-        if let Ok(path) = browser.profile_path(Some(&profile)) {
+        if let Ok(path) = browser.bookmarks_path(Some(&profile)) {
             if let Ok(bookmarks) = read_bookmarks_file(&path, Some(&profile)) {
                 outputs.push(bookmarks);
             }
