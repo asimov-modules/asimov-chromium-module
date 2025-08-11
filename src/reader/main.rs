@@ -51,10 +51,11 @@ fn main() -> Result<SysexitsError, Box<dyn Error>> {
     if let Some(sidebar) = input.get("sidebar") {
         if let Some(_containers) = sidebar.get("containers") {
             // Extract profile from input JSON or use "Default"
-            let profile = input.get("profile")
+            let profile = input
+                .get("profile")
                 .and_then(|v| v.as_str().map(|s| s.to_string()))
                 .unwrap_or_else(|| "Default".to_string());
-            
+
             input = asimov_chromium_module::specialized::arc::convert_arc_bookmarks_to_chromium(
                 input,
                 Some(profile.as_str()),
