@@ -3,7 +3,7 @@
 name: chromium
 label: Chromium
 title: ASIMOV Chromium Module
-summary: Chromium (and Brave, Google Chrome) bookmark import.
+summary: Chromium (and Brave, Google Chrome, Arc) bookmark import.
 links:
   - https://github.com/asimov-modules/asimov-chromium-module
   - https://crates.io/crates/asimov-chromium-module
@@ -21,3 +21,4 @@ handles:
     - edge://bookmarks
     - opera://bookmarks
     - vivaldi://bookmarks
+    - arc://bookmarks

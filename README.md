@@ -64,6 +64,16 @@ asimov-chromium-cataloger edge://bookmarks
 asimov-chromium-cataloger edge://bookmarks/Profile\ 1
 ```
 
+#### Importing bookmarks from Arc
+
+```bash
+asimov-chromium-cataloger arc://bookmarks
+asimov-chromium-cataloger arc://bookmarks/Default
+asimov-chromium-cataloger arc://bookmarks/Profile1
+```
+
+**Note:** For Arc profiles with spaces, use the format without spaces (e.g., `Profile1` instead of `Profile 1`). The tool automatically formats them internally.
+
 ### Import of Bookmarks Files
 
 #### Parsing bookmarks files on macOS
@@ -73,6 +83,8 @@ asimov-chromium-reader < $HOME/Library/Application\ Support/Chromium/Profile\ 1/
 asimov-chromium-reader < $HOME/Library/Application\ Support/Google/Chrome/Profile\ 1/Bookmarks
 asimov-chromium-reader < $HOME/Library/Application\ Support/BraveSoftware/Brave-Browser/Default/Bookmarks
 asimov-chromium-reader < $HOME/Library/Application\ Support/Microsoft\ Edge/Profile\ 1/Bookmarks
+asimov-chromium-reader < $HOME/Library/Application\ Support/Google/Chrome/Profile\ 1/Bookmarks
+asimov-chromium-reader < $HOME/Library/Application\ Support/Arc/StorableSidebar.json
 ```
 
 #### Parsing bookmarks files on Linux
@@ -82,6 +94,7 @@ asimov-chromium-reader < $HOME/.config/chromium/Profile\ 1/Bookmarks
 asimov-chromium-reader < $HOME/.config/google-chrome/Profile\ 1/Bookmarks
 asimov-chromium-reader < $HOME/.config/BraveSoftware/Brave-Browser/Default/Bookmarks
 asimov-chromium-reader < $HOME/.config/microsoft-edge/Profile\ 1/Bookmarks
+asimov-chromium-reader < $HOME/.config/Arc/StorableSidebar.json
 ```
 
 #### Parsing bookmarks files on Windows
@@ -91,6 +104,7 @@ Get-Content "$env:LOCALAPPDATA\Chromium\User Data\Profile 1\Bookmarks" | asimov-
 Get-Content "$env:LOCALAPPDATA\Google\Chrome\User Data\Profile 1\Bookmarks" | asimov-chromium-reader
 Get-Content "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data\Default\Bookmarks" | asimov-chromium-reader
 Get-Content "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Profile 1\Bookmarks" | asimov-chromium-reader
+Get-Content "$env:LOCALAPPDATA\Arc\User Data\Default\StorableSidebar.json" | asimov-chromium-reader
 ```
 
 ## ⚙ Configuration

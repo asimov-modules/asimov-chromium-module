@@ -9,5 +9,6 @@ extern crate std;
 pub mod bookmarks;
 pub mod browsers;
 pub mod jq;
+pub mod specialized;
 
 pub use bookmarks::*;
