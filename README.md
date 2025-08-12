@@ -40,39 +40,49 @@ cargo install asimov-chromium-module
 
 ```bash
 asimov-chromium-cataloger chromium://bookmarks
-asimov-chromium-cataloger chromium://bookmarks/Profile\ 1
+asimov-chromium-cataloger chromium://bookmarks/1
+asimov-chromium-cataloger chromium://bookmarks/1
 ```
 
 #### Importing bookmarks from Chrome
 
 ```bash
-asimov-chromium-cataloger chrome://bookmarks
-asimov-chromium-cataloger chrome://bookmarks/Default
+asimov-chromium-cataloger chrome:
+asimov-chromium-cataloger chrome://bookmarks/1
+asimov-chromium-cataloger chrome://bookmarks/2 
 ```
 
 #### Importing bookmarks from Brave
 
 ```bash
 asimov-chromium-cataloger brave://bookmarks
-asimov-chromium-cataloger brave://bookmarks/Profile\ 2
+asimov-chromium-cataloger brave://bookmarks/1
+asimov-chromium-cataloger brave://bookmarks/2
 ```
 
 #### Importing bookmarks from Microsoft Edge
 
 ```bash
 asimov-chromium-cataloger edge://bookmarks
-asimov-chromium-cataloger edge://bookmarks/Profile\ 1
+asimov-chromium-cataloger edge://bookmarks/1
+asimov-chromium-cataloger edge://bookmarks/2
 ```
 
 #### Importing bookmarks from Arc
 
 ```bash
 asimov-chromium-cataloger arc://bookmarks
-asimov-chromium-cataloger arc://bookmarks/Default
-asimov-chromium-cataloger arc://bookmarks/Profile1
+asimov-chromium-cataloger arc://bookmarks/1
+asimov-chromium-cataloger arc://bookmarks/2
 ```
 
-**Note:** For Arc profiles with spaces, use the format without spaces (e.g., `Profile1` instead of `Profile 1`). The tool automatically formats them internally.
+**Note:**
+
+**Note:**
+
+- `{browser}://bookmarks` lists bookmarks from all available profiles
+- `{browser}://bookmarks/1` lists bookmarks from the first profile (Default)
+- `{browser}://bookmarks/2` lists bookmarks from the second profile
 
 ### Import of Bookmarks Files
 

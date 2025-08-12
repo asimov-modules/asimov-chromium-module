@@ -16,7 +16,6 @@ pub struct ArcBookmark {
     pub created_at: Option<f64>,
 }
 
-/// Finds the container with most saved bookmarks (fallback for old Arc versions)
 fn discover_pinned_container_id(arc_data: &Value) -> Option<String> {
     let mut parent_id_counts: HashMap<String, usize> = HashMap::new();
 
@@ -76,7 +75,6 @@ fn discover_pinned_container_id(arc_data: &Value) -> Option<String> {
         .map(|(id, _)| id)
 }
 
-/// Maps profile names to their container IDs by analyzing container types
 fn discover_profile_containers(arc_data: &Value) -> HashMap<String, String> {
     let mut profile_containers: HashMap<String, String> = HashMap::new();
 
@@ -145,10 +143,27 @@ fn discover_profile_containers(arc_data: &Value) -> HashMap<String, String> {
     profile_containers
 }
 
-/// Extracts bookmarks for a specific profile or all profiles
-///
-/// Uses JSON-LD format when no profile specified (faster),
-/// falls back to sidebar format for profile filtering
+fn map_numeric_profile_to_name(arc_data: &Value, profile_index: u32) -> Option<String> {
+    let profile_containers = discover_profile_containers(arc_data);
+    
+    if profile_containers.is_empty() {
+        return None;
+    }
+    
+    // Sort profile names to ensure consistent ordering
+    let mut sorted_profiles: Vec<_> = profile_containers.keys().collect();
+    sorted_profiles.sort();
+    
+    // Convert 1-based index to 0-based array index
+    let array_index = (profile_index as usize).saturating_sub(1);
+    
+    if array_index < sorted_profiles.len() {
+        Some(sorted_profiles[array_index].clone())
+    } else {
+        None
+    }
+}
+
 pub fn extract_arc_bookmarks_for_profile(
     arc_data: &Value,
     target_profile: Option<&str>,
@@ -173,7 +188,34 @@ pub fn extract_arc_bookmarks_for_profile(
     extract_arc_bookmarks_from_sidebar(arc_data, target_profile)
 }
 
-/// Extracts bookmarks from sidebar structure with profile filtering
+pub fn extract_arc_bookmarks_for_numeric_profile(
+    arc_data: &Value,
+    profile_index: Option<u32>,
+) -> Result<Vec<ArcBookmark>> {
+    match profile_index {
+        Some(0) | None => {
+            // Return all bookmarks from all profiles
+            extract_arc_bookmarks_for_profile(arc_data, None)
+        }
+        Some(index) => {
+            // Map numeric index to profile name
+            if let Some(profile_name) = map_numeric_profile_to_name(arc_data, index) {
+                extract_arc_bookmarks_for_profile(arc_data, Some(&profile_name))
+            } else {
+                Err(miette::miette!(
+                    "Profile index {} not found. Available profiles: {}",
+                    index,
+                    discover_profile_containers(arc_data)
+                        .keys()
+                        .cloned()
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                ))
+            }
+        }
+    }
+}
+
 fn extract_arc_bookmarks_from_sidebar(
     arc_data: &Value,
     target_profile: Option<&str>,
@@ -288,12 +330,10 @@ fn extract_arc_bookmarks_from_sidebar(
     Ok(bookmarks)
 }
 
-/// Backward compatibility function
 pub fn extract_arc_bookmarks(arc_data: &Value) -> Result<Vec<ArcBookmark>> {
     extract_arc_bookmarks_for_profile(arc_data, None)
 }
 
-/// Extracts bookmark from new JSON-LD format (no profile filtering)
 fn extract_bookmark_from_jsonld_item(item: &Value) -> Option<ArcBookmark> {
     let item_type = item.get("@type")?.as_str()?;
     if item_type != "know:Bookmark" {
@@ -311,7 +351,6 @@ fn extract_bookmark_from_jsonld_item(item: &Value) -> Option<ArcBookmark> {
     })
 }
 
-/// Extracts bookmark from sidebar item (legacy format)
 fn extract_bookmark_from_item(item: &Value, pinned_container_id: &str) -> Option<ArcBookmark> {
     let parent_id = item.get("parentID")?.as_str()?;
     if parent_id != pinned_container_id {
@@ -332,7 +371,6 @@ fn extract_bookmark_from_item(item: &Value, pinned_container_id: &str) -> Option
     })
 }
 
-/// Extracts bookmark from sidebar item (profile-based)
 fn extract_bookmark_from_item_with_profile(
     item: &Value,
     _container_id: &str,
@@ -352,7 +390,6 @@ fn extract_bookmark_from_item_with_profile(
     })
 }
 
-/// Converts Arc bookmarks to Chromium format for browser import
 pub fn convert_arc_bookmarks_to_chromium(arc_data: Value, profile: Option<&str>) -> Result<Value> {
     let bookmarks = extract_arc_bookmarks_for_profile(&arc_data, profile)?;
     let mut counter = 0;
@@ -397,7 +434,50 @@ pub fn convert_arc_bookmarks_to_chromium(arc_data: Value, profile: Option<&str>)
     Ok(result)
 }
 
-/// Converts Arc's CFAbsoluteTime to Chromium timestamp format
+pub fn convert_arc_bookmarks_to_chromium_numeric(arc_data: Value, profile_index: Option<u32>) -> Result<Value> {
+    let bookmarks = extract_arc_bookmarks_for_numeric_profile(&arc_data, profile_index)?;
+    let mut counter = 0;
+    let mut chromium_bookmarks = Vec::new();
+
+    for bookmark in bookmarks {
+        counter += 1;
+
+        let date_added = if let Some(created_at) = bookmark.created_at {
+            convert_cf_absolute_time(created_at)
+        } else {
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap();
+            ((now.as_secs() + 11644473600) * 1000000) as i64
+        };
+
+        let chromium_bookmark = serde_json::json!({
+            "guid": format!("arc-{}-{}", date_added, counter),
+            "name": bookmark.title,
+            "url": bookmark.url,
+            "type": "url",
+            "date_added": date_added,
+        });
+
+        chromium_bookmarks.push(chromium_bookmark);
+    }
+
+    let result = serde_json::json!({
+        "roots": {
+            "bookmark_bar": {
+                "children": chromium_bookmarks,
+                "type": "folder"
+            },
+            "other": {
+                "children": [],
+                "type": "folder"
+            }
+        }
+    });
+
+    Ok(result)
+}
+
 pub fn convert_cf_absolute_time(cf_absolute_time: f64) -> i64 {
     let seconds_between_1970_and_2001 = 978307200.0;
     let unix_timestamp_seconds = cf_absolute_time + seconds_between_1970_and_2001;
