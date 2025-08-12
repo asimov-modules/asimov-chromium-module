@@ -78,8 +78,6 @@ asimov-chromium-cataloger arc://bookmarks/2
 
 **Note:**
 
-**Note:**
-
 - `{browser}://bookmarks` lists bookmarks from all available profiles
 - `{browser}://bookmarks/1` lists bookmarks from the first profile (Default)
 - `{browser}://bookmarks/2` lists bookmarks from the second profile
