@@ -145,18 +145,18 @@ fn discover_profile_containers(arc_data: &Value) -> HashMap<String, String> {
 
 fn map_numeric_profile_to_name(arc_data: &Value, profile_index: u32) -> Option<String> {
     let profile_containers = discover_profile_containers(arc_data);
-    
+
     if profile_containers.is_empty() {
         return None;
     }
-    
+
     // Sort profile names to ensure consistent ordering
     let mut sorted_profiles: Vec<_> = profile_containers.keys().collect();
     sorted_profiles.sort();
-    
+
     // Convert 1-based index to 0-based array index
     let array_index = (profile_index as usize).saturating_sub(1);
-    
+
     if array_index < sorted_profiles.len() {
         Some(sorted_profiles[array_index].clone())
     } else {
@@ -196,7 +196,7 @@ pub fn extract_arc_bookmarks_for_numeric_profile(
         Some(0) | None => {
             // Return all bookmarks from all profiles
             extract_arc_bookmarks_for_profile(arc_data, None)
-        }
+        },
         Some(index) => {
             // Map numeric index to profile name
             if let Some(profile_name) = map_numeric_profile_to_name(arc_data, index) {
@@ -212,7 +212,7 @@ pub fn extract_arc_bookmarks_for_numeric_profile(
                         .join(", ")
                 ))
             }
-        }
+        },
     }
 }
 
@@ -434,7 +434,10 @@ pub fn convert_arc_bookmarks_to_chromium(arc_data: Value, profile: Option<&str>)
     Ok(result)
 }
 
-pub fn convert_arc_bookmarks_to_chromium_numeric(arc_data: Value, profile_index: Option<u32>) -> Result<Value> {
+pub fn convert_arc_bookmarks_to_chromium_numeric(
+    arc_data: Value,
+    profile_index: Option<u32>,
+) -> Result<Value> {
     let bookmarks = extract_arc_bookmarks_for_numeric_profile(&arc_data, profile_index)?;
     let mut counter = 0;
     let mut chromium_bookmarks = Vec::new();

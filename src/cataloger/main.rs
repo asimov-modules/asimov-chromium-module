@@ -78,7 +78,7 @@ pub fn main() -> Result<SysexitsError, Box<dyn Error>> {
         } else {
             transform.execute(input)?
         };
-        
+
         // Serialize the output JSON-LD:
         if cfg!(feature = "pretty") {
             colored_json::write_colored_json(&output, &mut std::io::stdout())?;

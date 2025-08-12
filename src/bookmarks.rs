@@ -1,11 +1,11 @@
 // This is free and unencumbered software released into the public domain.
 
-#[cfg(feature = "std")]
-use std::vec::Vec;
-#[cfg(feature = "std")]
-use std::string::ToString;
 use jq::{JsonFilter, JsonFilterError};
 use serde_json::Value;
+#[cfg(feature = "std")]
+use std::string::ToString;
+#[cfg(feature = "std")]
+use std::vec::Vec;
 
 /// Transforms Chromium JSON bookmarks to JSON-LD.
 pub struct BookmarksTransform {
@@ -35,11 +35,11 @@ impl BookmarksTransform {
 
         // Transform each profile individually and collect all items
         let mut all_items = Vec::new();
-        
+
         for input in &inputs {
             // Use BookmarksTransform to convert to JSON-LD
             let result = self.execute(input.clone())?;
-            
+
             // Extract items from the result and add to all_items
             if let Some(items) = result.get("items") {
                 if let Some(items_array) = items.as_array() {
@@ -49,7 +49,7 @@ impl BookmarksTransform {
                 }
             }
         }
-        
+
         // Create final merged result with all items from all profiles
         let merged_result = serde_json::json!({
             "@context": {
@@ -76,7 +76,7 @@ impl BookmarksTransform {
             },
             "items": all_items
         });
-        
+
         Ok(merged_result)
     }
 }

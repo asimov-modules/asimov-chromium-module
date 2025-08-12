@@ -160,22 +160,23 @@ impl BrowserConfig {
                             // Check if this directory contains a Bookmarks file (indicating it's a profile)
                             let profile_dir = base_path.join(name);
                             let bookmarks_file = profile_dir.join("Bookmarks");
-                            
-                            if matches!(name, "Default") || 
-                               name.starts_with("Profile ") || 
-                               name.starts_with("Profile") ||
-                               bookmarks_file.is_file() {
+
+                            if matches!(name, "Default")
+                                || name.starts_with("Profile ")
+                                || name.starts_with("Profile")
+                                || bookmarks_file.is_file()
+                            {
                                 profiles.push(name.to_string());
                             }
                         }
                     }
                 }
-                
+
                 // If no profiles found, return at least "Default"
                 if profiles.is_empty() {
                     profiles.push("Default".to_string());
                 }
-                
+
                 Ok(profiles)
             },
         }
@@ -194,18 +195,21 @@ fn convert_arc_to_bookmarks_numeric(arc_data: Value, profile_index: Option<u32>)
 
 /// Maps numeric profile indices to actual profile names
 /// 1 -> "Profile 1" or "Default", 2 -> "Profile 2", etc.
-fn map_numeric_profile_to_name(available_profiles: &[String], profile_index: u32) -> Option<String> {
+fn map_numeric_profile_to_name(
+    available_profiles: &[String],
+    profile_index: u32,
+) -> Option<String> {
     if available_profiles.is_empty() {
         return None;
     }
-    
+
     // Sort profile names to ensure consistent ordering
     let mut sorted_profiles: Vec<_> = available_profiles.iter().collect();
     sorted_profiles.sort();
-    
+
     // Convert 1-based index to 0-based array index
     let array_index = (profile_index as usize).saturating_sub(1);
-    
+
     if array_index < sorted_profiles.len() {
         Some(sorted_profiles[array_index].clone())
     } else {
@@ -292,7 +296,9 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
     }
 
     let profile_index: Option<u32> = if url.starts_with(&format!("{}/", browser.paths.url_prefix)) {
-        let profile_part = url.strip_prefix(&format!("{}/", browser.paths.url_prefix)).unwrap_or("");
+        let profile_part = url
+            .strip_prefix(&format!("{}/", browser.paths.url_prefix))
+            .unwrap_or("");
         if profile_part.is_empty() {
             None
         } else {
@@ -305,7 +311,7 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
     };
 
     let available_profiles = browser.list_profiles()?;
-    
+
     if available_profiles.is_empty() {
         return Err(miette!("No profiles found for browser: {}", browser.name()));
     }
@@ -315,7 +321,7 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
         Some(0) | None => {
             // Collect bookmarks from all profiles
             let mut all_bookmarks = Vec::new();
-            
+
             for profile in &available_profiles {
                 if let Ok(path) = browser.bookmarks_path(Some(profile)) {
                     if let Ok(bookmarks) = read_bookmarks_file(&path, Some(profile)) {
@@ -323,17 +329,18 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
                     }
                 }
             }
-            
+
             // Use BookmarksTransform to process multiple profiles and merge results
             let transform = crate::BookmarksTransform::new()
                 .map_err(|e| miette!("Failed to create BookmarksTransform: {}", e))?;
-            
+
             // Use the execute_multiple method to transform and merge all profiles
-            let merged_result = transform.execute_multiple(all_bookmarks)
+            let merged_result = transform
+                .execute_multiple(all_bookmarks)
                 .map_err(|e| miette!("Failed to transform and merge bookmarks: {}", e))?;
-            
+
             outputs.push(merged_result);
-        }
+        },
         Some(index) => {
             if let Some(profile_name) = map_numeric_profile_to_name(&available_profiles, index) {
                 if let Ok(path) = browser.bookmarks_path(Some(&profile_name)) {
@@ -348,7 +355,7 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
                     available_profiles.join(", ")
                 ));
             }
-        }
+        },
     }
 
     if outputs.is_empty() {
@@ -392,7 +399,10 @@ fn read_bookmarks_file(path: &Path, profile: Option<&str>) -> Result<Value> {
     }
 }
 
-fn read_bookmarks_file_with_numeric_profile(path: &Path, profile_index: Option<u32>) -> Result<Value> {
+fn read_bookmarks_file_with_numeric_profile(
+    path: &Path,
+    profile_index: Option<u32>,
+) -> Result<Value> {
     if !path.is_file() {
         return Err(miette!("Bookmarks file not found at {}", path.display()));
     }
