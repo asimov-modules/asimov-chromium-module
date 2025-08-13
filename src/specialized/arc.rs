@@ -1,5 +1,3 @@
-// This is free and unencumbered software released into the public domain.
-
 use miette::Result;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -8,7 +6,7 @@ use std::string::String;
 use std::string::ToString;
 use std::vec::Vec;
 
-/// Bookmark extracted from Arc's StorableSidebar.json
+/// Represents a bookmark extracted from Arc browser's StorableSidebar.json
 #[derive(Debug)]
 pub struct ArcBookmark {
     pub title: String,
@@ -16,6 +14,10 @@ pub struct ArcBookmark {
     pub created_at: Option<f64>,
 }
 
+/// Discovers the container ID with the most pinned bookmarks
+///
+/// Analyzes the sidebar data to find which container has the highest
+/// number of valid bookmarks (with both URL and title).
 fn discover_pinned_container_id(arc_data: &Value) -> Option<String> {
     let mut parent_id_counts: HashMap<String, usize> = HashMap::new();
 
@@ -75,6 +77,7 @@ fn discover_pinned_container_id(arc_data: &Value) -> Option<String> {
         .map(|(id, _)| id)
 }
 
+/// Maps profile names to their container IDs by analyzing sidebar structure
 fn discover_profile_containers(arc_data: &Value) -> HashMap<String, String> {
     let mut profile_containers: HashMap<String, String> = HashMap::new();
 
@@ -150,11 +153,9 @@ fn map_numeric_profile_to_name(arc_data: &Value, profile_index: u32) -> Option<S
         return None;
     }
 
-    // Sort profile names to ensure consistent ordering
     let mut sorted_profiles: Vec<_> = profile_containers.keys().collect();
     sorted_profiles.sort();
 
-    // Convert 1-based index to 0-based array index
     let array_index = (profile_index as usize).saturating_sub(1);
 
     if array_index < sorted_profiles.len() {
@@ -172,7 +173,6 @@ pub fn extract_arc_bookmarks_for_profile(
         return extract_arc_bookmarks_from_sidebar(arc_data, target_profile);
     }
 
-    // Try new JSON-LD format first
     if let Some(items) = arc_data.get("items") {
         if let Some(items_array) = items.as_array() {
             let mut bookmarks = Vec::new();
@@ -193,12 +193,8 @@ pub fn extract_arc_bookmarks_for_numeric_profile(
     profile_index: Option<u32>,
 ) -> Result<Vec<ArcBookmark>> {
     match profile_index {
-        Some(0) | None => {
-            // Return all bookmarks from all profiles
-            extract_arc_bookmarks_for_profile(arc_data, None)
-        },
+        Some(0) | None => extract_arc_bookmarks_for_profile(arc_data, None),
         Some(index) => {
-            // Map numeric index to profile name
             if let Some(profile_name) = map_numeric_profile_to_name(arc_data, index) {
                 extract_arc_bookmarks_for_profile(arc_data, Some(&profile_name))
             } else {
@@ -224,7 +220,6 @@ fn extract_arc_bookmarks_from_sidebar(
     let profile_containers = discover_profile_containers(arc_data);
 
     if profile_containers.is_empty() {
-        // Fallback to old logic
         let pinned_container_id = discover_pinned_container_id(arc_data).ok_or_else(|| {
             miette::miette!("Could not find any profile containers or pinned bookmarks in Arc data")
         })?;
@@ -292,7 +287,6 @@ fn extract_arc_bookmarks_from_sidebar(
                 ));
             }
         } else {
-            // Extract from all profiles
             for (profile_name, container_id) in profile_containers {
                 if let Some(sidebar) = arc_data.get("sidebar") {
                     if let Some(containers) = sidebar.get("containers") {
@@ -390,8 +384,8 @@ fn extract_bookmark_from_item_with_profile(
     })
 }
 
-pub fn convert_arc_bookmarks_to_chromium(arc_data: Value, profile: Option<&str>) -> Result<Value> {
-    let bookmarks = extract_arc_bookmarks_for_profile(&arc_data, profile)?;
+/// Converts Arc bookmarks to Chromium format
+fn convert_arc_bookmarks_to_chromium_internal(bookmarks: Vec<ArcBookmark>) -> Result<Value> {
     let mut counter = 0;
     let mut chromium_bookmarks = Vec::new();
 
@@ -434,51 +428,17 @@ pub fn convert_arc_bookmarks_to_chromium(arc_data: Value, profile: Option<&str>)
     Ok(result)
 }
 
+pub fn convert_arc_bookmarks_to_chromium(arc_data: Value, profile: Option<&str>) -> Result<Value> {
+    let bookmarks = extract_arc_bookmarks_for_profile(&arc_data, profile)?;
+    convert_arc_bookmarks_to_chromium_internal(bookmarks)
+}
+
 pub fn convert_arc_bookmarks_to_chromium_numeric(
     arc_data: Value,
     profile_index: Option<u32>,
 ) -> Result<Value> {
     let bookmarks = extract_arc_bookmarks_for_numeric_profile(&arc_data, profile_index)?;
-    let mut counter = 0;
-    let mut chromium_bookmarks = Vec::new();
-
-    for bookmark in bookmarks {
-        counter += 1;
-
-        let date_added = if let Some(created_at) = bookmark.created_at {
-            convert_cf_absolute_time(created_at)
-        } else {
-            let now = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap();
-            ((now.as_secs() + 11644473600) * 1000000) as i64
-        };
-
-        let chromium_bookmark = serde_json::json!({
-            "guid": format!("arc-{}-{}", date_added, counter),
-            "name": bookmark.title,
-            "url": bookmark.url,
-            "type": "url",
-            "date_added": date_added,
-        });
-
-        chromium_bookmarks.push(chromium_bookmark);
-    }
-
-    let result = serde_json::json!({
-        "roots": {
-            "bookmark_bar": {
-                "children": chromium_bookmarks,
-                "type": "folder"
-            },
-            "other": {
-                "children": [],
-                "type": "folder"
-            }
-        }
-    });
-
-    Ok(result)
+    convert_arc_bookmarks_to_chromium_internal(bookmarks)
 }
 
 pub fn convert_cf_absolute_time(cf_absolute_time: f64) -> i64 {

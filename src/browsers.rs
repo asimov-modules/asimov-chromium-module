@@ -4,7 +4,7 @@ use serde_json::Value;
 use std::path::{Path, PathBuf};
 use std::string::{String, ToString};
 use std::vec::Vec;
-use std::{format, vec};
+use std::{format, vec, eprintln};
 
 use crate::specialized;
 
@@ -103,12 +103,9 @@ impl BrowserConfig {
 
     pub fn bookmarks_path(&self, profile_name: Option<&str>) -> Result<PathBuf> {
         match self.browser_type() {
-            Some(Browser::Arc) => {
-                // Arc sempre usa o StorableSidebar.json do diretório principal
-                // mas o profile_name é passado para convert_arc_to_bookmarks
-                self.platform_user_data_path()
-                    .map(|path| path.join("StorableSidebar.json"))
-            },
+            Some(Browser::Arc) => self
+                .platform_user_data_path()
+                .map(|path| path.join("StorableSidebar.json")),
             _ => self
                 .profile_path(profile_name)
                 .map(|path| path.join("Bookmarks")),
@@ -118,19 +115,15 @@ impl BrowserConfig {
     pub fn list_profiles(&self) -> Result<Vec<String>> {
         match self.browser_type() {
             Some(Browser::Arc) => {
-                // Arc stores profiles in the User Data subdirectory
                 let mut base_path = self.platform_user_data_path()?;
                 base_path.push("User Data");
                 let mut profiles = Vec::new();
 
-                // Check if the User Data path exists
                 if base_path.is_dir() {
                     for entry in std::fs::read_dir(&base_path).into_diagnostic()? {
                         let entry = entry.into_diagnostic()?;
                         if entry.file_type().into_diagnostic()?.is_dir() {
                             if let Some(name) = entry.file_name().to_str() {
-                                // Arc profiles are typically named like "Profile 1", "Profile 2", etc.
-                                // or "Default" for the default profile
                                 if matches!(name, "Default") || name.starts_with("Profile ") {
                                     profiles.push(name.to_string());
                                 }
@@ -139,7 +132,6 @@ impl BrowserConfig {
                     }
                 }
 
-                // If no profiles found, return at least "Default"
                 if profiles.is_empty() {
                     profiles.push("Default".to_string());
                 }
@@ -157,7 +149,6 @@ impl BrowserConfig {
                     let entry = entry.into_diagnostic()?;
                     if entry.file_type().into_diagnostic()?.is_dir() {
                         if let Some(name) = entry.file_name().to_str() {
-                            // Check if this directory contains a Bookmarks file (indicating it's a profile)
                             let profile_dir = base_path.join(name);
                             let bookmarks_file = profile_dir.join("Bookmarks");
 
@@ -172,7 +163,6 @@ impl BrowserConfig {
                     }
                 }
 
-                // If no profiles found, return at least "Default"
                 if profiles.is_empty() {
                     profiles.push("Default".to_string());
                 }
@@ -183,39 +173,18 @@ impl BrowserConfig {
     }
 }
 
-/// Converts Arc's StorableSidebar.json format to standard Chromium bookmarks format
+/// Converts Arc bookmarks to standard Chromium format
 fn convert_arc_to_bookmarks(arc_data: Value, profile: Option<&str>) -> Result<Value> {
     specialized::arc::convert_arc_bookmarks_to_chromium(arc_data, profile)
 }
 
-/// Converts Arc's StorableSidebar.json format to standard Chromium bookmarks format using numeric profile index
+/// Converts Arc bookmarks to standard Chromium format using numeric profile index
 fn convert_arc_to_bookmarks_numeric(arc_data: Value, profile_index: Option<u32>) -> Result<Value> {
     specialized::arc::convert_arc_bookmarks_to_chromium_numeric(arc_data, profile_index)
 }
 
-/// Maps numeric profile indices to actual profile names
-/// 1 -> "Profile 1" or "Default", 2 -> "Profile 2", etc.
-fn map_numeric_profile_to_name(
-    available_profiles: &[String],
-    profile_index: u32,
-) -> Option<String> {
-    if available_profiles.is_empty() {
-        return None;
-    }
-
-    // Sort profile names to ensure consistent ordering
-    let mut sorted_profiles: Vec<_> = available_profiles.iter().collect();
-    sorted_profiles.sort();
-
-    // Convert 1-based index to 0-based array index
-    let array_index = (profile_index as usize).saturating_sub(1);
-
-    if array_index < sorted_profiles.len() {
-        Some(sorted_profiles[array_index].clone())
-    } else {
-        None
-    }
-}
+// Use shared implementation from utils
+use crate::utils::map_numeric_profile_to_name;
 
 static SUPPORTED_BROWSERS: phf::Map<&'static str, UserDataPath> = phf_map! {
     "chrome" => UserDataPath {
@@ -277,7 +246,11 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
             if profile_part.is_empty() {
                 None
             } else {
-                profile_part.parse::<u32>().ok()
+                if profile_part == "Default" {
+                    Some(1)
+                } else {
+                    profile_part.parse::<u32>().ok()
+                }
             }
         } else {
             None
@@ -319,7 +292,9 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
     let mut outputs = Vec::new();
     match profile_index {
         Some(0) | None => {
-            // Collect bookmarks from all profiles
+            let transform = crate::BookmarksTransform::new()
+                .map_err(|e| miette!("Failed to create BookmarksTransform: {}", e))?;
+
             let mut all_bookmarks = Vec::new();
 
             for profile in &available_profiles {
@@ -330,11 +305,6 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
                 }
             }
 
-            // Use BookmarksTransform to process multiple profiles and merge results
-            let transform = crate::BookmarksTransform::new()
-                .map_err(|e| miette!("Failed to create BookmarksTransform: {}", e))?;
-
-            // Use the execute_multiple method to transform and merge all profiles
             let merged_result = transform
                 .execute_multiple(all_bookmarks)
                 .map_err(|e| miette!("Failed to transform and merge bookmarks: {}", e))?;
@@ -342,9 +312,13 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
             outputs.push(merged_result);
         },
         Some(index) => {
+            eprintln!("DEBUG: Profile index requested: {}", index);
             if let Some(profile_name) = map_numeric_profile_to_name(&available_profiles, index) {
+                eprintln!("DEBUG: Mapped to profile name: {}", profile_name);
                 if let Ok(path) = browser.bookmarks_path(Some(&profile_name)) {
+                    eprintln!("DEBUG: Reading bookmarks from path: {}", path.display());
                     if let Ok(bookmarks) = read_bookmarks_file(&path, Some(&profile_name)) {
+                        eprintln!("DEBUG: Successfully read bookmarks for profile: {}", profile_name);
                         outputs.push(bookmarks);
                     }
                 }
@@ -377,9 +351,7 @@ fn read_bookmarks_file(path: &Path, profile: Option<&str>) -> Result<Value> {
         .into_diagnostic()
         .wrap_err_with(|| format!("Failed to read bookmarks at {}", path.display()))?;
 
-    // Check if this is an Arc StorableSidebar.json file
     if path.file_name().and_then(|n| n.to_str()) == Some("StorableSidebar.json") {
-        // Parse as Arc format and convert to standard bookmarks format
         let arc_data: Value = serde_json::from_str(&input)
             .into_diagnostic()
             .wrap_err_with(|| {
@@ -389,10 +361,8 @@ fn read_bookmarks_file(path: &Path, profile: Option<&str>) -> Result<Value> {
                 )
             })?;
 
-        // Convert Arc format to standard bookmarks format
         convert_arc_to_bookmarks(arc_data, profile)
     } else {
-        // Standard Chromium bookmarks format
         serde_json::from_str(&input)
             .into_diagnostic()
             .wrap_err_with(|| format!("Failed to parse bookmarks JSON from {}", path.display()))
@@ -411,9 +381,7 @@ fn read_bookmarks_file_with_numeric_profile(
         .into_diagnostic()
         .wrap_err_with(|| format!("Failed to read bookmarks at {}", path.display()))?;
 
-    // Check if this is an Arc StorableSidebar.json file
     if path.file_name().and_then(|n| n.to_str()) == Some("StorableSidebar.json") {
-        // Parse as Arc format and convert to standard bookmarks format using numeric profile index
         let arc_data: Value = serde_json::from_str(&input)
             .into_diagnostic()
             .wrap_err_with(|| {
@@ -423,10 +391,8 @@ fn read_bookmarks_file_with_numeric_profile(
                 )
             })?;
 
-        // Convert Arc format to standard bookmarks format using numeric profile index
         convert_arc_to_bookmarks_numeric(arc_data, profile_index)
     } else {
-        // Standard Chromium bookmarks format
         serde_json::from_str(&input)
             .into_diagnostic()
             .wrap_err_with(|| format!("Failed to parse bookmarks JSON from {}", path.display()))

@@ -2,9 +2,6 @@
 
 use jq::{JsonFilter, JsonFilterError};
 use serde_json::Value;
-#[cfg(feature = "std")]
-use std::string::ToString;
-#[cfg(feature = "std")]
 use std::vec::Vec;
 
 /// Transforms Chromium JSON bookmarks to JSON-LD.
@@ -26,7 +23,31 @@ impl BookmarksTransform {
     /// Merges multiple bookmark profiles into a single result
     pub fn execute_multiple(&self, inputs: Vec<Value>) -> Result<Value, JsonFilterError> {
         if inputs.is_empty() {
-            return Ok(Value::Object(serde_json::Map::new()));
+            return Ok(serde_json::json!({
+                "@context": {
+                    "know": "https://know.dev/",
+                    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+                    "xsd": "http://www.w3.org/2001/XMLSchema#",
+                    "items": {
+                        "@id": "rdfs:member",
+                        "@type": "know:UserAccount",
+                        "@container": "@set"
+                    },
+                    "created": {
+                        "@id": "know:created",
+                        "@type": "xsd:dateTime"
+                    },
+                    "title": {
+                        "@id": "know:title",
+                        "@language": "en"
+                    },
+                    "link": {
+                        "@id": "know:link",
+                        "@type": "xsd:anyURI"
+                    }
+                },
+                "items": []
+            }));
         }
 
         if inputs.len() == 1 {
