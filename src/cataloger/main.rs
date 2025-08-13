@@ -70,11 +70,15 @@ pub fn main() -> Result<SysexitsError, Box<dyn Error>> {
     //     browsers::fetch_bookmarks(input_url)?
     // };
     let outputs = browsers::fetch_bookmarks(input_url.to_string().as_ref())?;
-
     // Transform JSON to JSON-LD:
     let transform = asimov_chromium_module::BookmarksTransform::new()?;
     for input in outputs {
-        let output = transform.execute(input)?;
+        let output = if input.get("@context").is_some() && input.get("items").is_some() {
+            input
+        } else {
+            transform.execute(input)?
+        };
+
         // Serialize the output JSON-LD:
         if cfg!(feature = "pretty") {
             colored_json::write_colored_json(&output, &mut std::io::stdout())?;
