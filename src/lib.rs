@@ -10,5 +10,6 @@ pub mod bookmarks;
 pub mod browsers;
 pub mod jq;
 pub mod specialized;
+pub mod utils;
 
 pub use bookmarks::*;
