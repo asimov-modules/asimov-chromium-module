@@ -4,7 +4,7 @@ use serde_json::Value;
 use std::path::{Path, PathBuf};
 use std::string::{String, ToString};
 use std::vec::Vec;
-use std::{format, vec, eprintln};
+use std::{eprintln, format, vec};
 
 use crate::specialized;
 
@@ -318,7 +318,10 @@ pub fn fetch_bookmarks(url: &str) -> Result<Vec<Value>> {
                 if let Ok(path) = browser.bookmarks_path(Some(&profile_name)) {
                     eprintln!("DEBUG: Reading bookmarks from path: {}", path.display());
                     if let Ok(bookmarks) = read_bookmarks_file(&path, Some(&profile_name)) {
-                        eprintln!("DEBUG: Successfully read bookmarks for profile: {}", profile_name);
+                        eprintln!(
+                            "DEBUG: Successfully read bookmarks for profile: {}",
+                            profile_name
+                        );
                         outputs.push(bookmarks);
                     }
                 }
