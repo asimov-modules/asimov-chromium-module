@@ -76,6 +76,13 @@ asimov-chromium-cataloger arc://bookmarks/1
 asimov-chromium-cataloger arc://bookmarks/2
 ```
 
+#### Importing bookmarks from Opera
+
+```bash
+asimov-chromium-cataloger opera://bookmarks
+asimov-chromium-cataloger opera://bookmarks/1
+```
+
 **Note:**
 
 - `{browser}://bookmarks` lists bookmarks from all available profiles
@@ -93,6 +100,7 @@ asimov-chromium-reader < $HOME/Library/Application\ Support/BraveSoftware/Brave-
 asimov-chromium-reader < $HOME/Library/Application\ Support/Microsoft\ Edge/Profile\ 1/Bookmarks
 asimov-chromium-reader < $HOME/Library/Application\ Support/Google/Chrome/Profile\ 1/Bookmarks
 asimov-chromium-reader < $HOME/Library/Application\ Support/Arc/StorableSidebar.json
+asimov-chromium-reader < $HOME/Library/Application\ Support/com.operasoftware.Opera/Default/Bookmarks
 ```
 
 #### Parsing bookmarks files on Linux
@@ -103,6 +111,7 @@ asimov-chromium-reader < $HOME/.config/google-chrome/Profile\ 1/Bookmarks
 asimov-chromium-reader < $HOME/.config/BraveSoftware/Brave-Browser/Default/Bookmarks
 asimov-chromium-reader < $HOME/.config/microsoft-edge/Profile\ 1/Bookmarks
 asimov-chromium-reader < $HOME/.config/Arc/StorableSidebar.json
+asimov-chromium-reader < $HOME/.config/opera/Default/Bookmarks
 ```
 
 #### Parsing bookmarks files on Windows
@@ -113,6 +122,7 @@ Get-Content "$env:LOCALAPPDATA\Google\Chrome\User Data\Profile 1\Bookmarks" | as
 Get-Content "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data\Default\Bookmarks" | asimov-chromium-reader
 Get-Content "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Profile 1\Bookmarks" | asimov-chromium-reader
 Get-Content "$env:LOCALAPPDATA\Arc\User Data\Default\StorableSidebar.json" | asimov-chromium-reader
+Get-Content "$env:LOCALAPPDATA\Opera\User Data\Default\Bookmarks" | asimov-chromium-reader
 ```
 
 ## ⚙ Configuration
