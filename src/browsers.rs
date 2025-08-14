@@ -32,6 +32,7 @@ pub enum Browser {
     Edge,
     Chromium,
     Arc,
+    Opera,
 }
 
 impl BrowserConfig {
@@ -46,6 +47,7 @@ impl BrowserConfig {
             "edge" => Some(Browser::Edge),
             "chromium" => Some(Browser::Chromium),
             "arc" => Some(Browser::Arc),
+            "opera" => Some(Browser::Opera),
             _ => None,
         }
     }
@@ -216,6 +218,12 @@ static SUPPORTED_BROWSERS: phf::Map<&'static str, UserDataPath> = phf_map! {
         linux: ".config/Arc",
         macos: "Library/Application Support/Arc",
         windows: "Arc/User Data",
+    },
+    "opera" => UserDataPath {
+        url_prefix: "opera://bookmarks",
+        linux: ".config/opera",
+        macos: "Library/Application Support/com.operasoftware.Opera",
+        windows: "Opera/User Data",
     },
 };
 
