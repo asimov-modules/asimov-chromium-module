@@ -14,6 +14,10 @@ use std::{error::Error, io::Read};
 struct Options {
     #[clap(flatten)]
     flags: StandardOptions,
+
+    /// The output format.
+    #[arg(value_name = "FORMAT", short = 'o', long)]
+    output: Option<String>,
 }
 
 fn main() -> Result<SysexitsError, Box<dyn Error>> {

@@ -21,6 +21,10 @@ struct Options {
     #[clap(flatten)]
     flags: StandardOptions,
 
+    /// The output format.
+    #[arg(value_name = "FORMAT", short = 'o', long)]
+    output: Option<String>,
+
     /// The browser bookmarks URL to catalog (e.g., `chrome://bookmarks`, `brave://bookmarks/2`)
     #[arg(value_name = "URL", value_parser = UriValueParser::new(&[
         Chrome,
