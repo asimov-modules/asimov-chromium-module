@@ -80,12 +80,7 @@ pub fn main() -> Result<SysexitsError, Box<dyn Error>> {
     for input in outputs {
         let output = transform.execute(input)?;
         // Serialize the output JSON-LD:
-        if cfg!(feature = "pretty") {
-            colored_json::write_colored_json(&output, &mut std::io::stdout())?;
-            println!();
-        } else {
-            println!("{}", serde_json::to_string(&output).unwrap());
-        }
+        println!("{}", output);
     }
 
     Ok(EX_OK)

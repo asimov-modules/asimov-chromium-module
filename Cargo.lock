@@ -76,7 +76,6 @@ dependencies = [
  "asimov-module",
  "clap",
  "clientele",
- "colored_json",
  "dogma",
  "getenv",
  "jq",

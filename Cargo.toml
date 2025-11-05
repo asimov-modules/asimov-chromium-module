@@ -24,7 +24,7 @@ std = ["asimov-module/std", "clap?/std", "clientele?/std", "dogma/std"]
 unstable = []
 
 # Optional features:
-pretty = ["know/pretty", "miette/fancy", "dep:colored_json"]
+pretty = ["know/pretty", "miette/fancy"]
 tracing = ["asimov-module/tracing", "clientele?/tracing"]
 
 [dependencies]
@@ -46,7 +46,6 @@ clientele = { version = "0.3.8", default-features = false, features = [
   "clap",
   "std",
 ], optional = true }
-colored_json = { version = "5", default-features = false, optional = true }
 
 [profile.release]
 opt-level = "z"
