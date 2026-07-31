@@ -29,7 +29,7 @@ tracing = ["asimov-module/tracing", "clientele?/tracing"]
 
 [dependencies]
 asimov-module = { version = "25.0.0-dev.17", default-features = false }
-dogma = { version = "0.1.11", default-features = false, features = ["all"] }
+dogma = { version = "0.2.1", default-features = false, features = ["all"] }
 getenv = { version = "0.1.2", default-features = false }
 jq = { version = "0.1", default-features = false, features = ["all"] }
 know = { version = "0.2.6", features = ["serde"] }
