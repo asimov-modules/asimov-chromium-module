@@ -1,6 +1,12 @@
 CARGO = cargo
+READMER = readmer
 
-all: Cargo.toml
+all: README.md
+
+README.md: .config/readmer/README.md.liquid
+	$(READMER) render $< > $@
+
+build: Cargo.toml
 	$(CARGO) build --release
 
 check: Cargo.toml
@@ -8,8 +14,11 @@ check: Cargo.toml
 
 clean: Cargo.toml
 	$(CARGO) clean
-	@rm -rf *~ target
+	rm -rf *~ target
 
-.PHONY: all check clean
+maintainer-clean: Cargo.toml
+	rm -f Cargo.lock
+
+.PHONY: all check clean maintainer-clean
 .SECONDARY:
 .SUFFIXES:

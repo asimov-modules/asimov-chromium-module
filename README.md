@@ -1,10 +1,11 @@
 # ASIMOV Chromium Module
 
 [![License](https://img.shields.io/badge/license-Public%20Domain-blue.svg)](https://unlicense.org)
+[![Compatibility](https://img.shields.io/badge/rust-2024%2B-blue)](https://endoflife.date/rust)
 [![Package on Crates.io](https://img.shields.io/crates/v/asimov-chromium-module)](https://crates.io/crates/asimov-chromium-module)
-[![Documentation](https://docs.rs/asimov-chromium-module/badge.svg)](https://docs.rs/asimov-chromium-module)
+[![Documentation](https://img.shields.io/docsrs/asimov-chromium-module?label=docs.rs)](https://docs.rs/asimov-chromium-module)
 
-[ASIMOV] module for [Chromium] (and Brave, Google Chrome, etc.) bookmark import.
+**[ASIMOV] module for [Chromium] (and Brave, Google Chrome, etc.) bookmark import.**
 
 ## ✨ Features
 
@@ -113,14 +114,15 @@ This module requires no configuration.
 
 ## 📚 Reference
 
-### Installed Binaries
+### Command-Line Interface
 
 - `asimov-chromium-cataloger`: lists bookmarks from Chromium-based browsers
 - `asimov-chromium-reader`: parses bookmarks from Chromium `Bookmarks` files
 
-### `asimov-chromium-cataloger`
+#### `asimov-chromium-cataloger`
 
-```
+```shellsession
+$ asimov-chromium-cataloger --help
 asimov-chromium-cataloger
 
 Usage: asimov-chromium-cataloger [OPTIONS] <URL>
@@ -129,26 +131,29 @@ Arguments:
   <URL>  The browser bookmarks URL to catalog (e.g., `chrome://bookmarks`, `brave://bookmarks/2`)
 
 Options:
-  -d, --debug       Enable debugging output
-      --license     Show license information
-  -v, --verbose...  Enable verbose output (may be repeated for more verbosity)
-  -V, --version     Print version information
-  -h, --help        Print help
+  -d, --debug            Enable debugging output
+      --license          Show license information
+  -v, --verbose...       Enable verbose output (may be repeated for more verbosity)
+  -V, --version          Print version information
+  -o, --output <FORMAT>  The output format
+  -h, --help             Print help
 ```
 
-### `asimov-chromium-reader`
+#### `asimov-chromium-reader`
 
-```
+```shellsession
+$ asimov-chromium-reader --help
 asimov-chromium-reader
 
 Usage: asimov-chromium-reader [OPTIONS]
 
 Options:
-  -d, --debug       Enable debugging output
-      --license     Show license information
-  -v, --verbose...  Enable verbose output (may be repeated for more verbosity)
-  -V, --version     Print version information
-  -h, --help        Print help
+  -d, --debug            Enable debugging output
+      --license          Show license information
+  -v, --verbose...       Enable verbose output (may be repeated for more verbosity)
+  -V, --version          Print version information
+  -o, --output <FORMAT>  The output format
+  -h, --help             Print help
 ```
 
 ## 👨‍💻 Development
@@ -159,11 +164,11 @@ git clone https://github.com/asimov-modules/asimov-chromium-module.git
 
 ---
 
-[![Share on X](https://img.shields.io/badge/share%20on-x-03A9F4?logo=x)](https://x.com/intent/post?url=https://github.com/asimov-modules/asimov-chromium-module&text=asimov-chromium-module)
-[![Share on Reddit](https://img.shields.io/badge/share%20on-reddit-red?logo=reddit)](https://reddit.com/submit?url=https://github.com/asimov-modules/asimov-chromium-module&title=asimov-chromium-module)
-[![Share on Hacker News](https://img.shields.io/badge/share%20on-hn-orange?logo=ycombinator)](https://news.ycombinator.com/submitlink?u=https://github.com/asimov-modules/asimov-chromium-module&t=asimov-chromium-module)
-[![Share on Facebook](https://img.shields.io/badge/share%20on-fb-1976D2?logo=facebook)](https://www.facebook.com/sharer/sharer.php?u=https://github.com/asimov-modules/asimov-chromium-module)
-[![Share on LinkedIn](https://img.shields.io/badge/share%20on-linkedin-3949AB?logo=linkedin)](https://www.linkedin.com/sharing/share-offsite/?url=https://github.com/asimov-modules/asimov-chromium-module)
+[![Share on X](https://img.shields.io/badge/share%20on-x-03A9F4?logo=x)](https://x.com/intent/post?url=https%3A%2F%2Fgithub.com%2Fasimov-modules%2Fasimov-chromium-module&text=ASIMOV%20Chromium%20Module)
+[![Share on Reddit](https://img.shields.io/badge/share%20on-reddit-red?logo=reddit)](https://reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fasimov-modules%2Fasimov-chromium-module&title=ASIMOV%20Chromium%20Module)
+[![Share on Hacker News](https://img.shields.io/badge/share%20on-hn-orange?logo=ycombinator)](https://news.ycombinator.com/submitlink?u=https%3A%2F%2Fgithub.com%2Fasimov-modules%2Fasimov-chromium-module&t=ASIMOV%20Chromium%20Module)
+[![Share on Facebook](https://img.shields.io/badge/share%20on-fb-1976D2?logo=facebook)](https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgithub.com%2Fasimov-modules%2Fasimov-chromium-module)
+[![Share on LinkedIn](https://img.shields.io/badge/share%20on-linkedin-3949AB?logo=linkedin)](https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fgithub.com%2Fasimov-modules%2Fasimov-chromium-module)
 
 [ASIMOV]: https://asimov.sh
 [ASIMOV CLI]: https://cli.asimov.sh
