@@ -1,9 +1,7 @@
 # ASIMOV Chromium Module
 
 [![License](https://img.shields.io/badge/license-Public%20Domain-blue.svg)](https://unlicense.org)
-[![Compatibility](https://img.shields.io/badge/rust-2024%2B-blue)](https://endoflife.date/rust)
 [![Package on Crates.io](https://img.shields.io/crates/v/asimov-chromium-module)](https://crates.io/crates/asimov-chromium-module)
-[![Documentation](https://img.shields.io/docsrs/asimov-chromium-module?label=docs.rs)](https://docs.rs/asimov-chromium-module)
 
 **[ASIMOV] module for [Chromium] (and Brave, Google Chrome, etc.) bookmark import.**
 
