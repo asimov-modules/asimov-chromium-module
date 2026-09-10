@@ -10,7 +10,7 @@ links:
 
 provides:
   programs:
-    - asimov-chromium-cataloger
+    - asimov-chromium-lister
     - asimov-chromium-reader
 
 handles:

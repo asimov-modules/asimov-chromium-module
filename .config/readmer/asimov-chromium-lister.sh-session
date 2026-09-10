@@ -1,10 +1,10 @@
-$ asimov-chromium-cataloger --help
-asimov-chromium-cataloger
+$ asimov-chromium-lister --help
+asimov-chromium-lister
 
-Usage: asimov-chromium-cataloger [OPTIONS] <URL>
+Usage: asimov-chromium-lister [OPTIONS] <URL>
 
 Arguments:
-  <URL>  The browser bookmarks URL to catalog (e.g., `chrome://bookmarks`, `brave://bookmarks/2`)
+  <URL>  The browser bookmarks URL to list (e.g., `chrome://bookmarks`, `brave://bookmarks/2`)
 
 Options:
   -d, --debug            Enable debugging output
