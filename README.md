@@ -38,37 +38,37 @@ cargo install asimov-chromium-module
 #### Importing bookmarks from Chromium
 
 ```bash
-asimov-chromium-cataloger chromium://bookmarks
-asimov-chromium-cataloger chromium://bookmarks/Profile\ 1
+asimov-chromium-lister chromium://bookmarks
+asimov-chromium-lister chromium://bookmarks/Profile\ 1
 ```
 
 #### Importing bookmarks from Chrome
 
 ```bash
-asimov-chromium-cataloger chrome://bookmarks
-asimov-chromium-cataloger chrome://bookmarks/Default
+asimov-chromium-lister chrome://bookmarks
+asimov-chromium-lister chrome://bookmarks/Default
 ```
 
 #### Importing bookmarks from Brave
 
 ```bash
-asimov-chromium-cataloger brave://bookmarks
-asimov-chromium-cataloger brave://bookmarks/Profile\ 2
+asimov-chromium-lister brave://bookmarks
+asimov-chromium-lister brave://bookmarks/Profile\ 2
 ```
 
 #### Importing bookmarks from Microsoft Edge
 
 ```bash
-asimov-chromium-cataloger edge://bookmarks
-asimov-chromium-cataloger edge://bookmarks/Profile\ 1
+asimov-chromium-lister edge://bookmarks
+asimov-chromium-lister edge://bookmarks/Profile\ 1
 ```
 
 #### Importing bookmarks from Arc
 
 ```bash
-asimov-chromium-cataloger arc://bookmarks
-asimov-chromium-cataloger arc://bookmarks/Default
-asimov-chromium-cataloger arc://bookmarks/Profile1
+asimov-chromium-lister arc://bookmarks
+asimov-chromium-lister arc://bookmarks/Default
+asimov-chromium-lister arc://bookmarks/Profile1
 ```
 
 **Note:** For Arc profiles with spaces, use the format without spaces (e.g., `Profile1` instead of `Profile 1`). The tool automatically formats them internally.
@@ -114,19 +114,19 @@ This module requires no configuration.
 
 ### Command-Line Interface
 
-- `asimov-chromium-cataloger`: lists bookmarks from Chromium-based browsers
+- `asimov-chromium-lister`: lists bookmarks from Chromium-based browsers
 - `asimov-chromium-reader`: parses bookmarks from Chromium `Bookmarks` files
 
-#### `asimov-chromium-cataloger`
+#### `asimov-chromium-lister`
 
 ```shellsession
-$ asimov-chromium-cataloger --help
-asimov-chromium-cataloger
+$ asimov-chromium-lister --help
+asimov-chromium-lister
 
-Usage: asimov-chromium-cataloger [OPTIONS] <URL>
+Usage: asimov-chromium-lister [OPTIONS] <URL>
 
 Arguments:
-  <URL>  The browser bookmarks URL to catalog (e.g., `chrome://bookmarks`, `brave://bookmarks/2`)
+  <URL>  The browser bookmarks URL to list (e.g., `chrome://bookmarks`, `brave://bookmarks/2`)
 
 Options:
   -d, --debug            Enable debugging output
